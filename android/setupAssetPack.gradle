@@ -1,0 +1,62 @@
+// setupAssetPack.gradle
+apply from: "$rootDir/setupAssetPack.gradle"
+ext {
+    // Name of the asset pack folder - can be passed as a command-line parameter
+    assetPackName = hasProperty('assetPackName') ? property('assetPackName') : 'example_pack'
+    assetPackDir = file("$rootDir/$assetPackName")
+}
+
+task setupAssetPack {
+    doLast {
+        // 1. Modify `settings.gradle` to include the asset pack
+        def settingsFile = file("$rootDir/settings.gradle")
+        def includeStatement = "include ':" + assetPackName + "'"
+
+        if (!settingsFile.text.contains(includeStatement)) {
+            settingsFile.append("\n$includeStatement")
+            println "Added $includeStatement to settings.gradle"
+        } else {
+            println "$includeStatement already exists in settings.gradle"
+        }
+
+        // 2. Create the asset pack folder structure
+        if (!assetPackDir.exists()) {
+            assetPackDir.mkdirs()
+            println "Created asset pack directory: $assetPackDir"
+
+            // Create build.gradle.kts for the asset pack
+            def buildGradleFile = new File(assetPackDir, "build.gradle.kts")
+            buildGradleFile.text = """
+                plugins {
+                   id("com.android.asset-pack")
+                }
+
+                assetPack {
+                    packName.set("$assetPackName")
+                    dynamicDelivery {
+                        deliveryType.set("on-demand")  // You could make this configurable
+                    }
+                }
+            """.stripIndent()
+            println "Created build.gradle for $assetPackName"
+
+            // Create AndroidManifest.xml for the asset pack
+            def manifestDir = new File(assetPackDir, "manifest")
+            manifestDir.mkdirs()
+            def manifestFile = new File(manifestDir, "AndroidManifest.xml")
+            manifestFile.text = """
+                <manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:dist="http://schemas.android.com/apk/distribution" package="your.package.name" split="$assetPackName">
+                 <dist:module dist:type="asset-pack">
+                   <dist:fusing dist:include="true" />    
+                   <dist:delivery>
+                     <dist:on-demand/>
+                   </dist:delivery>
+                 </dist:module>
+                </manifest>
+            """.stripIndent()
+            println "Created AndroidManifest.xml for $assetPackName"
+        } else {
+            println "$assetPackName directory already exists"
+        }
+    }
+}

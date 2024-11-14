@@ -10,8 +10,31 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
   final methodChannel = const MethodChannel('asset_delivery');
 
   @override
-  Future<String?> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
-    return version;
+  Future<void> fetch(String assetPackName) async {
+    try {
+      await methodChannel.invokeMethod('fetch', {'assetPack': assetPackName});
+    } on PlatformException catch (e) {
+      print("Failed to fetch asset pack: ${e.message}");
+    }
+  }
+
+  @override
+  Future<void> fetchAssetPackState(String assetPackName) async {
+    try {
+      await methodChannel
+          .invokeMethod('fetchAssetPackState', {'assetPack': assetPackName});
+    } on PlatformException catch (e) {
+      print("Failed to fetch asset pack state: ${e.message}");
+    }
+  }
+
+  @override
+  void setAssetPackStateUpdateListener(
+      Function(Map<String, dynamic>) onUpdate) {
+    methodChannel.setMethodCallHandler((call) async {
+      if (call.method == 'onAssetPackStateUpdate') {
+        onUpdate(call.arguments as Map<String, dynamic>);
+      }
+    });
   }
 }
