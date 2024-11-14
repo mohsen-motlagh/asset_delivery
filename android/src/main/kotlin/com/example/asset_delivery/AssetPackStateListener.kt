@@ -1,10 +1,9 @@
 import android.util.Log
-import com.google.android.play.core.assetpacks.AssetPackManager
 import com.google.android.play.core.assetpacks.AssetPackState
 import com.google.android.play.core.assetpacks.model.AssetPackStatus
+import io.flutter.plugin.common.MethodChannel
 
 class AssetPackStateListener(
-    private val assetPackManager: AssetPackManager,
     private var methodChannel: MethodChannel
 ) : (AssetPackState) -> Unit {
 

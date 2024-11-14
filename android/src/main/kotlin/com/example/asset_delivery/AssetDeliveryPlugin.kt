@@ -1,12 +1,23 @@
 package com.example.asset_delivery
 
-import androidx.annotation.NonNull
+import AssetPackStateListener
+import android.util.Log
+import com.google.android.play.core.assetpacks.AssetPackLocation
+import com.google.android.play.core.assetpacks.AssetPackManager
+import com.google.android.play.core.assetpacks.AssetPackManagerFactory
+import com.google.android.play.core.assetpacks.AssetPackState
+import com.google.android.play.core.assetpacks.AssetPackStates
+import com.google.android.play.core.assetpacks.model.AssetPackStatus
+import com.google.android.play.core.ktx.requestPackStates
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /** AssetDeliveryPlugin */
 class AssetDeliveryPlugin: FlutterPlugin, MethodCallHandler {
@@ -16,6 +27,7 @@ class AssetDeliveryPlugin: FlutterPlugin, MethodCallHandler {
   /// when the Flutter Engine is detached from the Activity
   private lateinit var channel : MethodChannel
   private lateinit var manager: AssetPackManager
+  private lateinit var assetPackStateListener: AssetPackStateListener
   private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
@@ -61,14 +73,14 @@ class AssetDeliveryPlugin: FlutterPlugin, MethodCallHandler {
         val assetPackState: AssetPackState =
             assetPackStates.packStates()[assetPackName] ?: throw IllegalStateException("Asset pack state not found")
 
-        Log.d("fetchAssetPackState", assetPackState.status.toString())
+        Log.d("fetchAssetPackState", assetPackState.status().toString())
 
-        if (assetPackState.status == AssetPackStatus.COMPLETED) {
+        if (assetPackState.status() == AssetPackStatus.COMPLETED) {
           Log.d("AssetPack", "Asset Pack is ready to use: $assetPackName")
-          result.success(assetPackState.status) // Send result back to Flutter
+          result.success(assetPackState.status()) // Send result back to Flutter
         } else {
-          Log.d("AssetPack", "Asset Pack not ready: Status = ${assetPackState.status}")
-          result.success(assetPackState.status) // Send the status to Flutter
+          Log.d("AssetPack", "Asset Pack not ready: Status = ${assetPackState.status()}")
+          result.success(assetPackState.status()) // Send the status to Flutter
         }
       } catch (e: Exception) {
         Log.e("AssetDeliveryPlugin", e.message.toString())
