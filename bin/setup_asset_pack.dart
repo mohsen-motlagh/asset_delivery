@@ -100,23 +100,17 @@ Future<void> main(List<String> arguments) async {
     print('Updated assetPacks in app/build.gradle with ":$assetPackName"');
   } else {
     // Add a new `assetPacks` property if it doesn't exist
-    final insertionPoint = appBuildGradleContent.indexOf('android {');
-    if (insertionPoint != -1) {
-      appBuildGradleContent = appBuildGradleContent.replaceRange(
-        insertionPoint,
-        insertionPoint,
-        '''
-android {
-    assetPacks = [":$assetPackName"]
-
-''',
+    final androidBlockPattern = RegExp(r'android\s*{');
+    if (androidBlockPattern.hasMatch(appBuildGradleContent)) {
+      appBuildGradleContent = appBuildGradleContent.replaceFirst(
+        androidBlockPattern,
+        '${androidBlockPattern.pattern}\n    assetPacks = [":$assetPackName"]',
       );
       print('Added assetPacks to app/build.gradle with ":$assetPackName"');
     } else {
       print('Error: Could not locate the `android` block in app/build.gradle');
+      exit(1);
     }
   }
-
-  // Write back changes to `android/app/build.gradle`
   appBuildGradleFile.writeAsStringSync(appBuildGradleContent);
 }
