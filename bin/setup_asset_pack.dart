@@ -104,7 +104,7 @@ Future<void> main(List<String> arguments) async {
     if (androidBlockPattern.hasMatch(appBuildGradleContent)) {
       appBuildGradleContent = appBuildGradleContent.replaceFirst(
         androidBlockPattern,
-        '${androidBlockPattern.pattern}\n    assetPacks = [":$assetPackName"]',
+        'android {\n    assetPacks = [":$assetPackName"]',
       );
       print('Added assetPacks to app/build.gradle with ":$assetPackName"');
     } else {
