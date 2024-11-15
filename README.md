@@ -14,7 +14,8 @@ For help getting started with Flutter development, view the
 samples, guidance on mobile development, and a full API reference.
 
 
-./gradlew -p android setupAssetPack -PassetPackName=desired_pack_name
+dart run asset_delivery:setup_asset_pack.dart <assetPackName>
+
 
 
 
