@@ -11,7 +11,7 @@ class AssetDelivery {
     return AssetDeliveryPlatform.instance.fetchAssetPackState(assetPackName);
   }
 
-  static Future<void> getAssetPackPath(String assetPackName) {
+  static Future<String?> getAssetPackPath(String assetPackName) {
     return AssetDeliveryPlatform.instance.getAssetPackPath(assetPackName);
   }
 

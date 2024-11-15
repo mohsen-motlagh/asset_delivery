@@ -24,7 +24,9 @@ class MockAssetDeliveryPlatform
   }
 
   @override
-  Future<void> getAssetPackPath(String assetPackName) async {
+  Future<String?> getAssetPackPath(String assetPackName) async {
+    return null;
+
     // Simulate fetching asset pack state.
   }
 }
