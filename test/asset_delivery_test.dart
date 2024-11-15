@@ -22,6 +22,11 @@ class MockAssetDeliveryPlatform
       Function(Map<String, dynamic>) onUpdate) {
     // Simulate setting a listener.
   }
+
+  @override
+  Future<void> getAssetPackPath(String assetPackName) async {
+    // Simulate fetching asset pack state.
+  }
 }
 
 void main() {

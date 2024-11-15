@@ -11,6 +11,7 @@ void main() {
 
   // Fetch asset packs or query their states as needed
   AssetDelivery.fetch("example_pack");
+  AssetDelivery.getAssetPackPath("example_pack");
   AssetDelivery.fetchAssetPackState("example_pack");
   runApp(const MyApp());
 }

@@ -17,6 +17,8 @@ void main() {
             return null; // Simulate successful fetch.
           case 'fetchAssetPackState':
             return null; // Simulate successful state fetch.
+          case 'getAssets':
+            return null;
           default:
             return null;
         }
