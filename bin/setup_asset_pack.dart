@@ -10,7 +10,6 @@ Future<void> main(List<String> arguments) async {
   }
   final assetPackName = arguments[0];
   final androidDir = Directory('android/$assetPackName');
-  final buildGradleFile = File('${androidDir.path}/build.gradle.kts');
   final rootDir = Directory.current.path;
 
   final settingsFile = File('$rootDir/android/settings.gradle');
