@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -8,6 +10,7 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
   final methodChannel = const MethodChannel('asset_delivery');
+  final progressChannel = const MethodChannel('on_demand_resources_progress');
 
   static void Function(String status, double progress)? onStatusChange;
 
@@ -20,28 +23,10 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
     }
   }
 
-  // MethodChannelAssetDelivery() {
-  // Listen for method calls from the native side
-  // methodChannel.setMethodCallHandler(_handleMethodCall);
-  // }
-
-  // @override
-  // Future<void> onAssetPackStatusChange() async {
-  //   methodChannel.setMethodCallHandler(
-  //       'onAssetPackStatusChange', {'assetPack': assetPackName});
-  //       if (call.method == 'onAssetPackStatusChange') {
-  //       Map<String, dynamic> statusMap =
-  //           Map<String, dynamic>.from(call.arguments);
-  //       StatusMap status = StatusMap.fromJson(statusMap);
-  //       _assetStatusController.add(status);
-  //     }
-  // }
-
   @override
   Future<void> fetchAssetPackState(String assetPackName) async {
     try {
-      await methodChannel
-          .invokeMethod('fetchAssetPackState', {'assetPack': assetPackName});
+      await methodChannel.invokeMethod('fetchAssetPackState', {'assetPack': assetPackName});
     } on PlatformException catch (e) {
       print("Failed to fetch asset pack state: ${e.message}");
     }
@@ -50,40 +35,41 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
   @override
   Future<String?> getAssetPackPath(String assetPackName) async {
     String? assetPath;
-    try {
-      final String? result = await methodChannel
-          .invokeMethod('getAssets', {'assetPack': assetPackName});
-      assetPath = result;
-    } on PlatformException catch (e) {
-      print("Failed to fetch asset pack state: ${e.message}");
+    if (Platform.isAndroid) {
+      try {
+        final String? result = await methodChannel.invokeMethod('getAssets', {'assetPack': assetPackName});
+        assetPath = result;
+      } on PlatformException catch (e) {
+        print("Failed to fetch asset pack state: ${e.message}");
+        return null;
+      }
+    } else if (Platform.isIOS) {
+      try {
+        final String? path = await methodChannel.invokeMethod('getDownloadResources', {'tag': assetPackName});
+        assetPath = path;
+      } on PlatformException catch (e) {
+        debugPrint("Failed to download resources: ${e.message}");
+        return null;
+      }
     }
     return assetPath;
   }
 
   @override
-  void setAssetPackStateUpdateListener(
-      Function(Map<String, dynamic>) onUpdate) {
-    methodChannel.setMethodCallHandler((call) async {
-      if (call.method == 'onAssetPackStatusChange') {
-        onUpdate(call.arguments as Map<String, dynamic>);
-      }
-    });
+  void setAssetPackStateUpdateListener(Function(Map<String, dynamic>) onUpdate) {
+    if (Platform.isAndroid) {
+      methodChannel.setMethodCallHandler((call) async {
+        if (call.method == 'onAssetPackStatusChange') {
+          onUpdate(call.arguments as Map<String, dynamic>);
+        }
+      });
+    } else if (Platform.isIOS) {
+      progressChannel.setMethodCallHandler((call) async {
+        if (call.method == 'updateProgress') {
+          final double progress = call.arguments as double;
+          onUpdate({'status': 'downloading', 'progress': progress});
+        }
+      });
+    }
   }
-
-//   static Future<void> _handleMethodCall(MethodCall call) async {
-//     switch (call.method) {
-//       case 'onAssetPackStatusChange':
-//         final Map<dynamic, dynamic> args = call.arguments;
-//         final String status = args['status'] ?? 'unknown';
-//         final double progress = (args['downloadProgress'] ?? 0.0).toDouble();
-//         // Notify the listener, if set
-//         onStatusChange?.call(status, progress);
-//         break;
-//       default:
-//         throw PlatformException(
-//           code: 'Unimplemented',
-//           details: 'The method ${call.method} is not implemented',
-//         );
-//     }
-//   }
 }

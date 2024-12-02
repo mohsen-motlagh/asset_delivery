@@ -7,12 +7,12 @@ Pod::Spec.new do |s|
   s.version          = '0.0.1'
   s.summary          = 'A new Flutter plugin project.'
   s.description      = <<-DESC
-A new Flutter plugin project.
+This plugin helps deliver assets dynamically for iOS and Android..
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'https://github.com/mohsen-motlagh/asset_delivery/tree/main'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'email@example.com' }
-  s.source           = { :path => '.' }
+  s.author           = { 'Mohsen Motlagh' => 'mohsenmotlagh@outlook.com' }
+  s.source           = { :path => 'https://github.com/mohsen-motlagh/asset_delivery/tree/main/ios' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
   s.platform = :ios, '12.0'
