@@ -21,10 +21,10 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
     switch call.method {
         case "getDownloadResources":
             if let args = call.arguments as? [String: Any],
-            print("args \(args)"),
+            print("args \(args)")
             
                let tag = args["tag"] as? String {
-                print("tags \(tag)"),
+                print("tags \(tag)")
                 getDownloadResources(tag: tag, result: result)
             } else {
                 result(FlutterError(code: "INVALID_ARGUMENT",
@@ -38,13 +38,13 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
   /// Method to download resources and return their path
     private func getDownloadResources(tag: String, result: @escaping FlutterResult) {
         let resourceRequest = NSBundleResourceRequest(tags: [tag])
-        print("111111"),
+        print("111111")
         // Observe the progress of the download
         progressObservation = resourceRequest.progress.observe(\.fractionCompleted) { progress, _ in
             self.sendProgressToFlutter(progress: progress.fractionCompleted)
         }
         
-        print("222222"),
+        print("222222")
         resourceRequest.beginAccessingResources { [self] error in
             if let error = error {
                 result(FlutterError(code: "RESOURCE_ERROR",
@@ -54,13 +54,13 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
             }
             
             let fileManager = FileManager.default
-            print("33333"),
+            print("33333")
             let dir = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-            print("44444"),
+            print("44444")
             let subfolderName = "\(tag)"
-            print("55555"),
+            print("55555")
             let subfolderURL = dir.appendingPathComponent(subfolderName)
-            print("66666"),
+            print("66666")
             
             do {
                 print("77777")
