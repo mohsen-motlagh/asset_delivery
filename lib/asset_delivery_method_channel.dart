@@ -38,10 +38,8 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
     String? assetPath;
     try {
       if (Platform.isAndroid) {
-        debugPrint('Fetching asset path on Android...');
         assetPath = await methodChannel.invokeMethod('getAssets', {'assetPack': assetPackName});
       } else if (Platform.isIOS) {
-        debugPrint('Fetching asset path on iOS...');
         assetPath = await methodChannel.invokeMethod('getDownloadResources', {'tag': assetPackName});
       } else {
         debugPrint('Unsupported platform');
@@ -66,11 +64,9 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
         }
       });
     } else if (Platform.isIOS) {
-      debugPrint('Listening for iOS progress updates...');
       progressChannel.setMethodCallHandler((call) async {
         if (call.method == 'updateProgress') {
           final progress = (call.arguments as double?) ?? 0.0;
-          debugPrint('iOS Progress Update: $progress');
           onUpdate({'status': 'downloading', 'downloadProgress': progress});
         }
       });

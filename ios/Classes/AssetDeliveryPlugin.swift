@@ -27,7 +27,6 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
                                     details: nil))
                 return
             }
-            print("Tag received: \(tag)")
             getDownloadResources(tag: tag, result: result)
         default:
             result(FlutterMethodNotImplemented)
@@ -36,7 +35,6 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
 
     private func getDownloadResources(tag: String, result: @escaping FlutterResult) {
         let resourceRequest = NSBundleResourceRequest(tags: [tag])
-        print("Resource request started for tag: \(tag)")
         
         // Observe the progress of the download
         progressObservation = resourceRequest.progress.observe(\.fractionCompleted) { [weak self] progress, _ in
@@ -47,7 +45,6 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
             guard let self = self else { return }
             
             if let error = error {
-                print("Resource request failed: \(error.localizedDescription)")
                 self.cleanupProgressObservation()
                 result(FlutterError(
                     code: "RESOURCE_ERROR",
@@ -68,10 +65,8 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
         let subfolderURL = dir.appendingPathComponent(tag)
         
         do {
-            print("Creating subfolder at: \(subfolderURL.path)")
             try fileManager.createDirectory(at: subfolderURL, withIntermediateDirectories: true, attributes: nil)
         } catch {
-            print("Failed to create subfolder: \(error.localizedDescription)")
             cleanupProgressObservation()
             result(FlutterError(
                 code: "ERROR_CREATING_FOLDER",
@@ -84,7 +79,6 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
         for i in 1...27 {  // Hardcoded range, customize if needed
             let assetName = "\(tag.uppercased())_\(i)"
             guard let asset = NSDataAsset(name: assetName) else {
-                print("Asset not found: \(assetName)")
                 cleanupProgressObservation()
                 result(FlutterError(
                     code: "RESOURCE_NOT_FOUND",
@@ -96,10 +90,8 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
             
             let fileURL = subfolderURL.appendingPathComponent("\(assetName).mp3")
             do {
-                print("Saving asset to \(fileURL.path)")
                 try asset.data.write(to: fileURL)
             } catch {
-                print("Failed to save asset: \(error.localizedDescription)")
                 cleanupProgressObservation()
                 result(FlutterError(
                     code: "ERROR_SAVING_FILE",
@@ -110,7 +102,6 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
             }
         }
         
-        print("All assets downloaded successfully for tag: \(tag)")
         cleanupProgressObservation()
         result(subfolderURL.absoluteString)
     }
