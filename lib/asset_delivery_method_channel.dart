@@ -36,6 +36,7 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
   Future<String?> getAssetPackPath(String assetPackName) async {
     String? assetPath;
     if (Platform.isAndroid) {
+      print('went inside android');
       try {
         final String? result = await methodChannel.invokeMethod('getAssets', {'assetPack': assetPackName});
         assetPath = result;
@@ -44,6 +45,7 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
         return null;
       }
     } else if (Platform.isIOS) {
+      print('went inside ios');
       try {
         final String? path = await methodChannel.invokeMethod('getDownloadResources', {'tag': assetPackName});
         assetPath = path;
