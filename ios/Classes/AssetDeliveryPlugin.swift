@@ -1,3 +1,6 @@
+import Flutter
+import UIKit
+
 public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
     private var methodChannel: FlutterMethodChannel?
     private var progressChannel: FlutterMethodChannel?
