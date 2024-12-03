@@ -48,6 +48,7 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
       print('went inside ios');
       try {
         final String? path = await methodChannel.invokeMethod('getDownloadResources', {'tag': assetPackName});
+        print('found the asset path ios $path');
         assetPath = path;
       } on PlatformException catch (e) {
         debugPrint("Failed to download resources: ${e.message}");
@@ -66,9 +67,12 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
         }
       });
     } else if (Platform.isIOS) {
+      print('listening ios ...');
       progressChannel.setMethodCallHandler((call) async {
+        print('listening ios call.method ... ${call.method}');
         if (call.method == 'updateProgress') {
           final double progress = call.arguments as double;
+          print('listening ios progress... $progress');
           onUpdate({'status': 'downloading', 'downloadProgress': progress});
         }
       });
