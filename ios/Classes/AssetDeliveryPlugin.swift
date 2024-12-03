@@ -21,7 +21,10 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
     switch call.method {
         case "getDownloadResources":
             if let args = call.arguments as? [String: Any],
+            print("args \(args)"),
+            
                let tag = args["tag"] as? String {
+                print("tags \(tag)"),
                 getDownloadResources(tag: tag, result: result)
             } else {
                 result(FlutterError(code: "INVALID_ARGUMENT",
@@ -35,12 +38,13 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
   /// Method to download resources and return their path
     private func getDownloadResources(tag: String, result: @escaping FlutterResult) {
         let resourceRequest = NSBundleResourceRequest(tags: [tag])
-        
+        print("111111"),
         // Observe the progress of the download
         progressObservation = resourceRequest.progress.observe(\.fractionCompleted) { progress, _ in
             self.sendProgressToFlutter(progress: progress.fractionCompleted)
         }
         
+        print("222222"),
         resourceRequest.beginAccessingResources { [self] error in
             if let error = error {
                 result(FlutterError(code: "RESOURCE_ERROR",
@@ -50,12 +54,18 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
             }
             
             let fileManager = FileManager.default
+            print("33333"),
             let dir = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+            print("44444"),
             let subfolderName = "\(tag)"
+            print("55555"),
             let subfolderURL = dir.appendingPathComponent(subfolderName)
+            print("66666"),
             
             do {
+                print("77777")
                 try fileManager.createDirectory(at: subfolderURL, withIntermediateDirectories: true, attributes: nil)
+                print("88888")
             } catch {
                 result(FlutterError(code: "ERROR_CREATING_FOLDER",
                                     message: "Error creating folder for tag \(tag)",
@@ -90,20 +100,20 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
     }
     
     /// Send progress updates to Flutter
-    // private func sendProgressToFlutter(progress: Double) {
-    //     DispatchQueue.main.async {
-    //         self.progressChannel?.invokeMethod("updateProgress", arguments: progress)
-    //     }
-    // }
-
-     private func sendProgressToFlutter(progress: Double) {
+    private func sendProgressToFlutter(progress: Double) {
         DispatchQueue.main.async {
-            guard let controller = self.window?.rootViewController as? FlutterViewController else {
-                return
-            }
-            let progressChannel = FlutterMethodChannel(name: "on_demand_resources_progress",
-                                                       binaryMessenger: controller.binaryMessenger)
-            progressChannel.invokeMethod("updateProgress", arguments: progress)
+            self.progressChannel?.invokeMethod("updateProgress", arguments: progress)
         }
     }
+
+    //  private func sendProgressToFlutter(progress: Double) {
+    //     DispatchQueue.main.async {
+    //         guard let controller = self.window?.rootViewController as? FlutterViewController else {
+    //             return
+    //         }
+    //         let progressChannel = FlutterMethodChannel(name: "on_demand_resources_progress",
+    //                                                    binaryMessenger: controller.binaryMessenger)
+    //         progressChannel.invokeMethod("updateProgress", arguments: progress)
+    //     }
+    // }
 }
