@@ -90,9 +90,20 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
     }
     
     /// Send progress updates to Flutter
-    private func sendProgressToFlutter(progress: Double) {
+    // private func sendProgressToFlutter(progress: Double) {
+    //     DispatchQueue.main.async {
+    //         self.progressChannel?.invokeMethod("updateProgress", arguments: progress)
+    //     }
+    // }
+
+     private func sendProgressToFlutter(progress: Double) {
         DispatchQueue.main.async {
-            self.progressChannel?.invokeMethod("updateProgress", arguments: progress)
+            guard let controller = self.window?.rootViewController as? FlutterViewController else {
+                return
+            }
+            let progressChannel = FlutterMethodChannel(name: "on_demand_resources_progress",
+                                                       binaryMessenger: controller.binaryMessenger)
+            progressChannel.invokeMethod("updateProgress", arguments: progress)
         }
     }
 }
