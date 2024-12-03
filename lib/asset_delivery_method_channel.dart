@@ -19,7 +19,8 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
     try {
       await methodChannel.invokeMethod('fetch', {'assetPack': assetPackName});
     } on PlatformException catch (e) {
-      print("Failed to fetch asset pack: ${e.message}");
+      debugPrint("Failed to fetch asset pack: ${e.message}");
+      rethrow; // Re-throw the error if higher-level handling is needed
     }
   }
 
@@ -28,32 +29,30 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
     try {
       await methodChannel.invokeMethod('fetchAssetPackState', {'assetPack': assetPackName});
     } on PlatformException catch (e) {
-      print("Failed to fetch asset pack state: ${e.message}");
+      debugPrint("Failed to fetch asset pack state: ${e.message}");
     }
   }
 
   @override
   Future<String?> getAssetPackPath(String assetPackName) async {
     String? assetPath;
-    if (Platform.isAndroid) {
-      print('went inside android');
-      try {
-        final String? result = await methodChannel.invokeMethod('getAssets', {'assetPack': assetPackName});
-        assetPath = result;
-      } on PlatformException catch (e) {
-        print("Failed to fetch asset pack state: ${e.message}");
-        return null;
+    try {
+      if (Platform.isAndroid) {
+        debugPrint('Fetching asset path on Android...');
+        assetPath = await methodChannel.invokeMethod('getAssets', {'assetPack': assetPackName});
+      } else if (Platform.isIOS) {
+        debugPrint('Fetching asset path on iOS...');
+        assetPath = await methodChannel.invokeMethod('getDownloadResources', {'tag': assetPackName});
+      } else {
+        debugPrint('Unsupported platform');
+        throw UnsupportedError('Platform not supported');
       }
-    } else if (Platform.isIOS) {
-      print('went inside ios');
-      try {
-        final String? path = await methodChannel.invokeMethod('getDownloadResources', {'tag': assetPackName});
-        print('found the asset path ios $path');
-        assetPath = path;
-      } on PlatformException catch (e) {
-        debugPrint("Failed to download resources: ${e.message}");
-        return null;
-      }
+    } on PlatformException catch (e) {
+      debugPrint("Failed to fetch asset pack path: ${e.message}");
+      return null;
+    } on UnsupportedError catch (e) {
+      debugPrint("Error: ${e.message}");
+      return null;
     }
     return assetPath;
   }
@@ -67,15 +66,16 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
         }
       });
     } else if (Platform.isIOS) {
-      print('listening ios ...');
+      debugPrint('Listening for iOS progress updates...');
       progressChannel.setMethodCallHandler((call) async {
-        print('listening ios call.method ... ${call.method}');
         if (call.method == 'updateProgress') {
-          final double progress = call.arguments as double;
-          print('listening ios progress... $progress');
+          final progress = (call.arguments as double?) ?? 0.0;
+          debugPrint('iOS Progress Update: $progress');
           onUpdate({'status': 'downloading', 'downloadProgress': progress});
         }
       });
+    } else {
+      debugPrint('Unsupported platform for progress updates');
     }
   }
 }
