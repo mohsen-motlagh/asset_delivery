@@ -69,7 +69,7 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
       progressChannel.setMethodCallHandler((call) async {
         if (call.method == 'updateProgress') {
           final double progress = call.arguments as double;
-          onUpdate({'status': 'downloading', 'progress': progress});
+          onUpdate({'status': 'downloading', 'downloadProgress': progress});
         }
       });
     }
