@@ -44,14 +44,14 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
         resourceRequest.beginAccessingResources { [self] error in
             if let error = error {
                 result(FlutterError(code: "RESOURCE_ERROR",
-                                    message: "Error accessing resources for tag \(tag)",
+                                    message: "\(error) tag:\(tag)",
                                     details: error.localizedDescription))
                 return
             }
             
             let fileManager = FileManager.default
             let dir = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-            let subfolderName = tag
+            let subfolderName = "\(tag)"
             let subfolderURL = dir.appendingPathComponent(subfolderName)
             
             do {
