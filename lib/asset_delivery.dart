@@ -11,17 +11,13 @@ class AssetDelivery {
     return AssetDeliveryPlatform.instance.fetchAssetPackState(assetPackName);
   }
 
-  static Future<String?> getAssetPackPath(String assetPackName) {
-    return AssetDeliveryPlatform.instance.getAssetPackPath(assetPackName);
+  static Future<String?> getAssetPackPath({required String assetPackName, required int count, String? namingPattern}) {
+    return AssetDeliveryPlatform.instance
+        .getAssetPackPath(assetPackName: assetPackName, count: count, namingPattern: namingPattern);
   }
 
-  // static Future<void> assetPackStatusListener(String assetPackName) {
-  //   return AssetDeliveryPlatform.instance.(onUpdate)
-  // }
-
   /// Sets up a listener for asset pack state updates.
-  static void setAssetPackStateUpdateListener(
-      Function(Map<String, dynamic>) onUpdate) {
+  static void setAssetPackStateUpdateListener(Function(Map<String, dynamic>) onUpdate) {
     AssetDeliveryPlatform.instance.setAssetPackStateUpdateListener(onUpdate);
   }
 }

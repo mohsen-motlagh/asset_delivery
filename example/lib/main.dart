@@ -5,13 +5,12 @@ void main() {
   AssetDelivery.setAssetPackStateUpdateListener((state) {
     print("Asset pack ${state['assetPack']} update:");
     print("Status: ${state['status']}");
-    print(
-        "Downloaded: ${state['bytesDownloaded']} / ${state['totalBytesToDownload']}");
+    print("Downloaded: ${state['bytesDownloaded']} / ${state['totalBytesToDownload']}");
   });
 
   // Fetch asset packs or query their states as needed
   AssetDelivery.fetch("example_pack");
-  AssetDelivery.getAssetPackPath("example_pack");
+  AssetDelivery.getAssetPackPath(assetPackName: "example_pack", count: 10);
   AssetDelivery.fetchAssetPackState("example_pack");
   runApp(const MyApp());
 }

@@ -27,13 +27,13 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
                                     details: nil))
                 return
             }
-            getDownloadResources(tag: tag, result: result)
+            getDownloadResources(tag: tag, result: result, args: args)
         default:
             result(FlutterMethodNotImplemented)
         }
     }
 
-    private func getDownloadResources(tag: String, result: @escaping FlutterResult) {
+    private func getDownloadResources(tag: String, args: [String: Any], result: @escaping FlutterResult) {
         let resourceRequest = NSBundleResourceRequest(tags: [tag])
         
         // Observe the progress of the download
@@ -54,12 +54,12 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
                 return
             }
             
-            self.handleResourceAccess(tag: tag, result: result)
+            self.handleResourceAccess(tag: tag, result: result, arge: args)
             resourceRequest.endAccessingResources()
         }
     }
 
-    private func handleResourceAccess(tag: String, result: @escaping FlutterResult) {
+    private func handleResourceAccess(tag: String, args: [String: Any], result: @escaping FlutterResult) {
         let fileManager = FileManager.default
         let dir = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         let subfolderURL = dir.appendingPathComponent(tag)
@@ -75,9 +75,11 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
             ))
             return
         }
-        
-        for i in 1...27 {  // Hardcoded range, customize if needed
-            let assetName = "\(tag.uppercased())_\(i)"
+        let range = args["assetRange"] as? Int ?? 1
+        let namingPattern = args["namingPattern"] as? String ?? "\(tag.uppercased())_%d"
+
+        for i in 1...range {  // Provide dynamic range, customize if needed
+            let assetName = String(format: namingPattern, i)
             guard let asset = NSDataAsset(name: assetName) else {
                 cleanupProgressObservation()
                 result(FlutterError(

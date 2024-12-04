@@ -34,13 +34,14 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
   }
 
   @override
-  Future<String?> getAssetPackPath(String assetPackName) async {
+  Future<String?> getAssetPackPath({required String assetPackName, required int count, String? namingPattern}) async {
     String? assetPath;
     try {
       if (Platform.isAndroid) {
         assetPath = await methodChannel.invokeMethod('getAssets', {'assetPack': assetPackName});
       } else if (Platform.isIOS) {
-        assetPath = await methodChannel.invokeMethod('getDownloadResources', {'tag': assetPackName});
+        assetPath = await methodChannel.invokeMethod(
+            'getDownloadResources', {'tag': assetPackName, 'namingPattern': namingPattern, 'assetRange': count});
       } else {
         debugPrint('Unsupported platform');
         throw UnsupportedError('Platform not supported');

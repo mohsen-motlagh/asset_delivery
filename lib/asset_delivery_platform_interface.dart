@@ -25,6 +25,6 @@ abstract class AssetDeliveryPlatform extends PlatformInterface {
 
   Future<void> fetch(String assetPackName);
   Future<void> fetchAssetPackState(String assetPackName);
-  Future<String?> getAssetPackPath(String assetPackName);
+  Future<String?> getAssetPackPath({required String assetPackName, required int count, String? namingPattern});
   void setAssetPackStateUpdateListener(Function(Map<String, dynamic>) onUpdate);
 }
