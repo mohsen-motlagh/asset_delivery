@@ -27,7 +27,7 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
                                     details: nil))
                 return
             }
-            getDownloadResources(tag: tag, result: result, args: args)
+            getDownloadResources(tag: tag, args: args, result: result, )
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -54,7 +54,7 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
                 return
             }
             
-            self.handleResourceAccess(tag: tag, result: result, arge: args)
+            self.handleResourceAccess(tag: tag, arge: args, result: result)
             resourceRequest.endAccessingResources()
         }
     }
