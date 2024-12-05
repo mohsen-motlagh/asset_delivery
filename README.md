@@ -1,32 +1,100 @@
-# asset_delivery
+# Asset Delivery Plugin for Flutter
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/to/develop-plugins),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+## Introduction
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The **Asset Delivery Plugin** simplifies managing **on-demand asset delivery** in Flutter applications. It integrates with Play Asset Delivery (Android) and On-Demand Resources (iOS), enabling dynamic asset downloads and seamless user experiences.
 
-This plugin give you the option to upload your assets to Play Store alongside the application and download them whenever you need them.
-Now we just have the this option functionality in Android but in near future we will have it for IOS as well.
+### Key Features
+- **On-Demand Asset Delivery:** Download and access assets dynamically at runtime.
+- **Customizable Resource Management:** Flexible naming patterns and ranges for asset files.
+- **Progress Tracking:** Real-time download progress updates.
+- **Cross-Platform Support:** Compatible with both Android and iOS.
 
-Lets start:
+---
 
-1- Add the plugin to your pubspec.yaml
+## Installation
 
-2- run this command in terminal:
-    dart run asset_delivery:setup_asset_pack.dart <assetPackName>
-3- Now you should have a folder with the name of thr assset pack you specify in the command, inside the folder you must have a build.gradle.kts file and a folder name manifest and inside that a manifest file.
+Add the following line to your `pubspec.yaml` file:
+```yaml
+dependencies:
+  asset_delivery: 
+    git:
+      url: https://github.com/mohsen-motlagh/asset_delivery.git
+      ref: main
+```
 
-Now you can retrieve the assets from Play Store after publishing your app to the Play Store, and before that for testing you have another option which we will learn later.
+## Setup
 
-We can download the assets and install them with assetDelivery.fetch("$assetpackName")
-    - it can be smart and if its already exist, stop the downloading
+### Android
 
-during the download we can have the status of the download and installing by calling assetDelivery.    
-with assetDelivery.getAssetPath("$assetpackName"), you can get the location of the assets which would be String
+#### Minimum SDK Version: 24
 
+1. Add the Play Asset Delivery library to your Gradle file:
+    ```gradle
+    implementation "com.google.android.play:asset-delivery:2.2.2"
+    ```
 
+2. Run the setup command in the terminal:
+    ```bash
+    dart run asset_delivery:setup_asset_pack.dart "YourAssetPackName"
+    ```
 
+3. A folder named after your asset pack will be created, containing:
+    - A `build.gradle.kts` file.
+    - A `manifest` folder with an `AndroidManifest.xml` file.
+
+4. Add your assets in the following path:
+    ```bash
+    YourAssetFolder/src/main/assets/"PUT YOUR ASSETS IN THIS DIRECTORY"
+    ```
+
+5. Once published to the Play Store, you can retrieve assets dynamically. To test before publishing, follow the **Testing** steps below.
+
+6. For multiple asset packs, repeat these steps for each asset pack.
+
+---
+
+### Android Testing
+
+1. Download the [BundleTool](https://github.com/google/bundletool/releases).
+
+2. Build your app bundle and use the following commands:
+
+    - **Generate the APKs:**
+        ```bash
+        java -jar bundletool.jar build-apks \
+          --bundle=<your_app_project_dir>/build/app/outputs/bundle/release/app-release.aab \
+          --output=<your_temp_dir>/app.apks \
+          --local-testing
+        ```
+
+    - **Install the APKs on your device:**
+        ```bash
+        java -jar bundletool.jar install-apks --apks=<your_temp_dir>/app.apks
+        ```
+
+3. To get the final APK size:
+    ```bash
+    java -jar bundletool.jar get-size total --apks=<your_temp_dir>/app.apks --dimensions=SDK
+    ```
+
+---
+
+### iOS
+
+1. Open Xcode and navigate to your **Runner** project.
+
+2. Add your assets to the **Assets** folder.
+
+3. Configure the asset pack:
+    - Select the asset or folder.
+    - In the right panel, find **On-Demand Resource Tags** under the settings icon.
+    - Add your **Asset Pack Name** (this should match the name used for Android).
+
+4. Ensure all assets are tagged appropriately.
+
+---
+
+### iOS Testing
+
+Run your app on a real device from Xcode to test the on-demand resource functionality, just as if it were downloaded from the App Store.

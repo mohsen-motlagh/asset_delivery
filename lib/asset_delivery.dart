@@ -18,6 +18,6 @@ class AssetDelivery {
 
   /// Sets up a listener for asset pack state updates.
   static void setAssetPackStateUpdateListener(Function(Map<String, dynamic>) onUpdate) {
-    AssetDeliveryPlatform.instance.setAssetPackStateUpdateListener(onUpdate);
+    AssetDeliveryPlatform.instance.getAssetPackStatus(onUpdate);
   }
 }

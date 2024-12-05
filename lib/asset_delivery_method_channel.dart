@@ -57,7 +57,7 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
   }
 
   @override
-  void setAssetPackStateUpdateListener(Function(Map<String, dynamic>) onUpdate) {
+  void getAssetPackStatus(Function(Map<String, dynamic>) onUpdate) {
     if (Platform.isAndroid) {
       methodChannel.setMethodCallHandler((call) async {
         if (call.method == 'onAssetPackStatusChange') {

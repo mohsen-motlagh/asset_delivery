@@ -16,7 +16,7 @@ class MockAssetDeliveryPlatform with MockPlatformInterfaceMixin implements Asset
   }
 
   @override
-  void setAssetPackStateUpdateListener(Function(Map<String, dynamic>) onUpdate) {
+  void getAssetPackStatus(Function(Map<String, dynamic>) onUpdate) {
     // Simulate setting a listener.
   }
 
