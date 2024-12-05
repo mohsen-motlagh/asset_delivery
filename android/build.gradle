@@ -1,4 +1,5 @@
-group = "com.example.asset_delivery"
+// group = "com.example.asset_delivery"
+group = "com.github.mohsen-motlagh.asset_delivery"
 version = "1.0-SNAPSHOT"
 
 buildscript {
@@ -26,7 +27,7 @@ apply plugin: "kotlin-android"
 
 android {
     if (project.android.hasProperty("namespace")) {
-        namespace = "com.example.asset_delivery"
+        namespace = "com.com.github.mohsen-motlagh.asset_delivery"
     }
 
     compileSdk = 34
