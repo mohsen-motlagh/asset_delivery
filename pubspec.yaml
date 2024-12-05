@@ -24,7 +24,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.github.mohsen-motlagh.asset_delivery
+        package: com.github.mohsenmotlagh.asset_delivery
         pluginClass: AssetDeliveryPlugin
       ios:
         pluginClass: AssetDeliveryPlugin

@@ -1,4 +1,4 @@
-package com.github.mohsen-motlagh.asset_delivery
+package com.github.mohsenmotlagh.asset_delivery
 
 import AssetPackStateListener
 import android.util.Log
