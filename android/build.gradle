@@ -27,7 +27,7 @@ apply plugin: "kotlin-android"
 
 android {
     if (project.android.hasProperty("namespace")) {
-        namespace = "com.com.github.mohsenmotlagh.asset_delivery"
+        namespace = "com.github.mohsenmotlagh.asset_delivery"
     }
 
     compileSdk = 34
