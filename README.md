@@ -45,7 +45,7 @@ dependencies:
 
 4. Add your assets in the following path:
     ```bash
-    YourAssetFolder/src/main/assets/"PUT YOUR ASSETS IN THIS DIRECTORY"
+    ProjectDirectory/Android/YourAssetFolder/src/main/assets/"PUT YOUR ASSETS IN THIS DIRECTORY"
     ```
 
 5. Once published to the Play Store, you can retrieve assets dynamically. To test before publishing, follow the **Testing** steps below.
@@ -98,3 +98,31 @@ dependencies:
 ### iOS Testing
 
 Run your app on a real device from Xcode to test the on-demand resource functionality, just as if it were downloaded from the App Store.
+
+## Usage
+
+1. **Download Assets**  
+   On Android devices, download and install assets dynamically using:  
+   ```dart
+   await assetDelivery.fetch("$assetpackName");
+
+   - If the assets already exist on the device, the download will be skipped automatically.
+   - On iOS, this step is not necessary as assets are accessed directly.
+
+2. Track Download Progress
+    During the download, track the status of the asset pack by calling:
+    ```
+    await assetDelivery.getAssetPackStatus();
+    ```
+
+3. Retrieve Asset Path    
+    Get the local path to the downloaded assets using:
+    ```
+    final path = await assetDelivery.getAssetPath("$assetpackName");
+    ```
+
+### Contributions
+Contributions are welcome! Feel free to submit issues or pull requests on GitHub.    
+
+### License
+This plugin is licensed under the MIT License. See the LICENSE file for details.
