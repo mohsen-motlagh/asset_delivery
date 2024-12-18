@@ -53,11 +53,11 @@ void main() {
     // Again, just verifying that the method runs without exception.
   });
 
-  test('setAssetPackStateUpdateListener', () {
+  test('getAssetPackStatus', () {
     callback(Map<String, dynamic> data) {
       // Handle data here in the listener callback.
     }
-    AssetDelivery.setAssetPackStateUpdateListener(callback);
+    AssetDelivery.getAssetPackStatus(callback);
     // This should complete without error.
   });
 }
