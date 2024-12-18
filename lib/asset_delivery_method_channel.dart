@@ -61,7 +61,10 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
     if (Platform.isAndroid) {
       methodChannel.setMethodCallHandler((call) async {
         if (call.method == 'onAssetPackStatusChange') {
-          onUpdate(call.arguments as Map<String, dynamic>);
+          print('call . arguments in check status ======= ${call.arguments.toString()}');
+          Map<String, dynamic> statusMap = Map<String, dynamic>.from(call.arguments);
+          print('inside the method channel class ====== ${statusMap.toString()}');
+          onUpdate(statusMap);
         }
       });
     } else if (Platform.isIOS) {
@@ -75,4 +78,14 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
       debugPrint('Unsupported platform for progress updates');
     }
   }
+}
+
+class StatusMap {
+  String status;
+  double downloadProgress;
+  StatusMap({required this.status, required this.downloadProgress});
+
+  StatusMap.fromJson(Map<String, dynamic> json)
+      : status = json['status'],
+        downloadProgress = json['downloadProgress'];
 }

@@ -51,8 +51,10 @@ class AssetPackStateListener(
     }
 
     private fun sendStatusToFlutter(status: String, downloadProgress: Double) {
+        Log.d("==== inside send to flutter====1111111", downloadProgress.toString()),
         val statusMap = mapOf("status" to status,
         "downloadProgress" to downloadProgress)
+        Log.d("==== inside send to flutter====", statusMap.toString()),
         methodChannel.invokeMethod("onAssetPackStatusChange", statusMap)
     }
 }
