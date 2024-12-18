@@ -18,6 +18,7 @@ class AssetPackStateListener(
                 val downloaded = assetPackState.bytesDownloaded()
                 val totalSize = assetPackState.totalBytesToDownload()
                 val percent = downloaded.toDouble() / totalSize.toDouble()
+                Log.d("====asset percent====", percent.toString())
                 sendStatusToFlutter("Downloading", percent)
             }
             AssetPackStatus.TRANSFERRING -> {
