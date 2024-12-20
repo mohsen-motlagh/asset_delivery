@@ -21,15 +21,15 @@ class AssetPackStateListener(
                 Log.d("====asset totoal size====", totalSize.toString())
                 val percent = downloaded.toDouble() / totalSize.toDouble()
                 Log.d("====asset percent====", percent.toString())
-                sendStatusToFlutter("Downloading", percent)
+                sendStatusToFlutter("DOWNLOADING", percent)
             }
             AssetPackStatus.TRANSFERRING -> {
                 Log.d("====asset status====", "TRANSFERRING")
-                sendStatusToFlutter("Transferring assets", 0.99)
+                sendStatusToFlutter("TRANSFERRING", 0.99)
             }
             AssetPackStatus.COMPLETED -> {
                 Log.d("====asset status====", "COMPLETED")
-                sendStatusToFlutter("Asset pack is ready to use.", 100.0)
+                sendStatusToFlutter("COMPLETED", 100.0)
             }
             AssetPackStatus.FAILED -> {
                 Log.d("====asset status====", "FAILED")
@@ -37,11 +37,11 @@ class AssetPackStateListener(
             }
             AssetPackStatus.CANCELED -> {
                 Log.d("====asset status====", "CANCELED")
-                sendStatusToFlutter("Canceled.", 0.0)
+                sendStatusToFlutter("CANCELED", 0.0)
             }
             AssetPackStatus.NOT_INSTALLED -> {
                 Log.d("====asset status====", "NOT_INSTALLED")
-                sendStatusToFlutter("Not Installed.", 0.0)
+                sendStatusToFlutter("Not Installed", 0.0)
             }
             AssetPackStatus.UNKNOWN -> {
                 Log.d("====asset status====", "UNKNOWN")
