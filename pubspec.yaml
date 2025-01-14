@@ -1,7 +1,7 @@
 name: asset_delivery
 description: "A new Flutter plugin project for asset delivery."
 version: 0.0.1
-homepage:
+homepage: https://github.com/mohsen-motlagh/asset_delivery
 
 environment:
   sdk: ^3.5.2
@@ -18,7 +18,7 @@ dev_dependencies:
   flutter_lints: ^4.0.0
 
 executables:
-  setup_asset_pack: bin/setup_asset_pack.dart
+  setup_asset_pack: setup_asset_pack
   
 flutter:
   plugin:

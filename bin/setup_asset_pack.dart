@@ -88,8 +88,7 @@ Future<void> main(List<String> arguments) async {
     appBuildGradleContent = appBuildGradleContent.replaceAllMapped(
       assetPacksPattern,
       (match) {
-        final existingPacks =
-            match.group(1)!.split(',').map((e) => e.trim()).toList();
+        final existingPacks = match.group(1)!.split(',').map((e) => e.trim()).toList();
         if (!existingPacks.contains('":$assetPackName"')) {
           existingPacks.add('":$assetPackName"');
           return 'assetPacks = [${existingPacks.join(', ')}]';
