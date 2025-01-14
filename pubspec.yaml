@@ -1,5 +1,5 @@
 name: asset_delivery
-description: "A new Flutter plugin project for asset delivery."
+description: "A Flutter plugin for managing on-demand asset delivery with Play Asset Delivery, supporting asset pack setup, progress tracking, and persistent storage."
 version: 0.0.1
 homepage: https://github.com/mohsen-motlagh/asset_delivery
 
