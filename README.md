@@ -21,6 +21,9 @@ dependencies:
     git:
       url: https://github.com/mohsen-motlagh/asset_delivery.git
       ref: main
+
+flutter:
+  generate: true      
 ```
 
 ## Setup
@@ -36,7 +39,7 @@ dependencies:
 
 2. Run the setup command in the terminal:
     ```bash
-    dart run asset_delivery:setup_asset_pack.dart "YourAssetPackName"
+    dart run asset_delivery:setup_asset_pack "YourAssetPackName"
     ```
 
 3. A folder named after your asset pack will be created, containing:

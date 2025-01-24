@@ -61,16 +61,15 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
     if (Platform.isAndroid) {
       methodChannel.setMethodCallHandler((call) async {
         if (call.method == 'onAssetPackStatusChange') {
-          print('call . arguments in check status ======= ${call.arguments.toString()}');
           Map<String, dynamic> statusMap = Map<String, dynamic>.from(call.arguments);
-          print('inside the method channel class ====== ${statusMap.toString()}');
           onUpdate(statusMap);
         }
       });
     } else if (Platform.isIOS) {
       progressChannel.setMethodCallHandler((call) async {
         if (call.method == 'updateProgress') {
-          final progress = (call.arguments as double?) ?? 0.0;
+          double? progress = call.arguments as double?;
+          print('download progress ===== $progress');
           onUpdate({'status': 'downloading', 'downloadProgress': progress});
         }
       });
