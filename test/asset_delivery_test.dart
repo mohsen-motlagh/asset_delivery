@@ -4,9 +4,7 @@ import 'package:asset_delivery/asset_delivery_platform_interface.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-class MockAssetDeliveryPlatform
-    with MockPlatformInterfaceMixin
-    implements AssetDeliveryPlatform {
+class MockAssetDeliveryPlatform with MockPlatformInterfaceMixin implements AssetDeliveryPlatform {
   @override
   Future<void> fetch(String assetPackName) async {
     // Simulate a successful fetch call.
@@ -23,10 +21,12 @@ class MockAssetDeliveryPlatform
   }
 
   @override
-  Future<String?> getAssetPackPath(
-      {required String assetPackName,
-      required int count,
-      String? namingPattern}) async {
+  Future<String?> getAssetPackPath({
+    required String assetPackName,
+    required int count,
+    required String namingPattern,
+    required String fileExtension,
+  }) async {
     return null;
 
     // Simulate fetching asset pack state.
