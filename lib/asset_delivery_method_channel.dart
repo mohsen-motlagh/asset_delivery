@@ -49,7 +49,7 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
           'tag': assetPackName,
           'namingPattern': namingPattern,
           'assetRange': count,
-          'extension': 'mp3',
+          'extension': fileExtension,
         });
       } else {
         debugPrint('Unsupported platform');
