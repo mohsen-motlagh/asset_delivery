@@ -20,7 +20,8 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: const Center(
-          child: Text('Running...'),
+          child: Text('Please check the example app'),
+          // Example app link : https://github.com/mohsen-motlagh/asset_delivery_example
         ),
       ),
     );

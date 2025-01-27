@@ -21,6 +21,9 @@ dependencies:
     git:
       url: https://github.com/mohsen-motlagh/asset_delivery.git
       ref: main
+
+flutter:
+  generate: true      
 ```
 
 ## Setup
@@ -36,7 +39,7 @@ dependencies:
 
 2. Run the setup command in the terminal:
     ```bash
-    dart run asset_delivery:setup_asset_pack.dart "YourAssetPackName"
+    dart run asset_delivery:setup_asset_pack "YourAssetPackName"
     ```
 
 3. A folder named after your asset pack will be created, containing:
@@ -55,6 +58,7 @@ dependencies:
 ---
 
 ### Android Testing
+## This method of testing is only available for Android versions below 12. Alternatively, you can publish your app to the Google Play Store for internal testing.
 
 1. Download the [BundleTool](https://github.com/google/bundletool/releases).
 
@@ -62,10 +66,7 @@ dependencies:
 
     - **Generate the APKs:**
         ```bash
-        java -jar bundletool.jar build-apks \
-          --bundle=<your_app_project_dir>/build/app/outputs/bundle/release/app-release.aab \
-          --output=<your_temp_dir>/app.apks \
-          --local-testing
+        java -jar bundletool.jar build-apks --bundle=<your_app_project_dir>/build/app/outputs/bundle/release/app-release.aab --output=<your_temp_dir>/app.apks --local-testing
         ```
 
     - **Install the APKs on your device:**
@@ -97,7 +98,7 @@ dependencies:
 
 ### iOS Testing
 
-Run your app on a real device from Xcode to test the on-demand resource functionality, just as if it were downloaded from the App Store.
+You can test your iOS app by running it from Xcode on a real device or simulator, as well as using flutter run --release.
 
 ## Usage
 
@@ -115,14 +116,35 @@ Run your app on a real device from Xcode to test the on-demand resource function
     await assetDelivery.getAssetPackStatus();
     ```
 
-3. Retrieve Asset Path    
-    Get the local path to the downloaded assets using:
-    ```
-    final path = await assetDelivery.getAssetPath("$assetpackName");
+### 3. Retrieve Asset Path  
+
+    Get the local path to the downloaded assets using the following code:  
+
+    ```dart
+    final path = await assetDelivery.getAssetPackPath(
+      assetPackName: widget.assetPackName,
+      count: widget.assetsCount,
+      namingPattern: widget.namingPattern,
+      fileExtension: widget.fileExtension,
+    );
+    Parameters:
+
+    assetPackName: The name of the asset pack.
+    count: The number of assets in the pack.
+    namingPattern: The naming convention for the assets.
+    fileExtension: The file extension of the assets (e.g., 'mp3').
     ```
 
+4. Check for keyword "COMPLETED" from the status to be sure the assets completely downloaded
+
+### Example
+[Example]*(https://github.com/mohsen-motlagh/asset_delivery_example)*
+
+### Suppor
+Please support the plugin by give a thumbs up in pub.dev and github
+
 ### Contributions
-Contributions are welcome! Feel free to submit issues or pull requests on GitHub.    
+Contributions are welcome! Feel free to submit issues or pull requests on GitHub.
 
 ### License
 This plugin is licensed under the MIT License. See the LICENSE file for details.
