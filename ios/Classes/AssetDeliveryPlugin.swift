@@ -77,7 +77,6 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
         }
         let range = args["assetRange"] as? Int ?? 1
         let namingPattern = args["namingPattern"] as? String ?? "\(tag.uppercased())_%d"
-        let fileExtension = args["fileExtension"] as? String ?? "mp3" // Default to mp3 if not provided
 
         for i in 1...range {  // Provide dynamic range, customize if needed
             let assetName = String(format: namingPattern, i)
