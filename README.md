@@ -58,6 +58,7 @@ flutter:
 ---
 
 ### Android Testing
+## This method of testing is only available for Android versions below 12. Alternatively, you can publish your app to the Google Play Store for internal testing.
 
 1. Download the [BundleTool](https://github.com/google/bundletool/releases).
 
@@ -65,10 +66,7 @@ flutter:
 
     - **Generate the APKs:**
         ```bash
-        java -jar bundletool.jar build-apks \
-          --bundle=<your_app_project_dir>/build/app/outputs/bundle/release/app-release.aab \
-          --output=<your_temp_dir>/app.apks \
-          --local-testing
+        java -jar bundletool.jar build-apks --bundle=<your_app_project_dir>/build/app/outputs/bundle/release/app-release.aab --output=<your_temp_dir>/app.apks --local-testing
         ```
 
     - **Install the APKs on your device:**
@@ -100,7 +98,7 @@ flutter:
 
 ### iOS Testing
 
-Run your app on a real device from Xcode to test the on-demand resource functionality, just as if it were downloaded from the App Store.
+You can test your iOS app by running it from Xcode on a real device or simulator, as well as using flutter run --release.
 
 ## Usage
 
@@ -118,11 +116,29 @@ Run your app on a real device from Xcode to test the on-demand resource function
     await assetDelivery.getAssetPackStatus();
     ```
 
-3. Retrieve Asset Path    
-    Get the local path to the downloaded assets using:
+### 3. Retrieve Asset Path  
+
+    Get the local path to the downloaded assets using the following code:  
+
+    ```dart
+    final path = await assetDelivery.getAssetPackPath(
+      assetPackName: widget.assetPackName,
+      count: widget.assetsCount,
+      namingPattern: widget.namingPattern,
+      fileExtension: widget.fileExtension,
+    );
+    Parameters:
+
+    assetPackName: The name of the asset pack.
+    count: The number of assets in the pack.
+    namingPattern: The naming convention for the assets.
+    fileExtension: The file extension of the assets (e.g., 'mp3').
     ```
-    final path = await assetDelivery.getAssetPath("$assetpackName");
-    ```
+
+4. Check for keyword "COMPLETED" from the status to be sure the assets completely downloaded
+
+### Example
+[Example]*(https://github.com/mohsen-motlagh/asset_delivery_example)*
 
 ### Suppor
 Please support the plugin by give a thumbs up in pub.dev and github
