@@ -81,17 +81,25 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
 
         for i in 1...range {  // Provide dynamic range, customize if needed
             let assetName = String(format: namingPattern, i)
-            guard let asset = NSDataAsset(name: assetName) else {
-                cleanupProgressObservation()
-                result(FlutterError(
-                    code: "RESOURCE_NOT_FOUND",
-                    message: "Resource not found for tag: \(tag), asset: \(assetName)",
-                    details: nil
-                ))
-                return
+            if let image = UIImage(named: assetName) {
+            // Save image as PNG or JPG
+            let fileURL = subfolderURL.appendingPathComponent("\(assetName).png")
+            if let imageData = image.pngData() {
+                do {
+                    try imageData.write(to: fileURL)
+                } catch {
+                    cleanupProgressObservation()
+                    result(FlutterError(
+                        code: "ERROR_SAVING_IMAGE",
+                        message: "Error saving image \(fileURL) for tag: \(tag)",
+                        details: error.localizedDescription
+                    ))
+                    return
+                }
             }
-            
-            let fileURL = subfolderURL.appendingPathComponent("\(assetName).\(fileExtension)")
+        } else if let asset = NSDataAsset(name: assetName) {
+            // Save as raw data for videos, sounds, etc.
+            let fileURL = subfolderURL.appendingPathComponent("\(assetName).\(extensionType)")
             do {
                 try asset.data.write(to: fileURL)
             } catch {
@@ -102,6 +110,15 @@ public class AssetDeliveryPlugin: NSObject, FlutterPlugin {
                     details: error.localizedDescription
                 ))
                 return
+            }
+        } else {
+            cleanupProgressObservation()
+            result(FlutterError(
+                code: "RESOURCE_NOT_FOUND",
+                message: "Resource not found for tag: \(tag), asset: \(assetName)",
+                details: nil
+            ))
+            return
             }
         }
         
