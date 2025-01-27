@@ -124,8 +124,11 @@ Run your app on a real device from Xcode to test the on-demand resource function
     final path = await assetDelivery.getAssetPath("$assetpackName");
     ```
 
+### Suppor
+Please support the plugin by give a thumbs up in pub.dev and github
+
 ### Contributions
-Contributions are welcome! Feel free to submit issues or pull requests on GitHub.    
+Contributions are welcome! Feel free to submit issues or pull requests on GitHub.
 
 ### License
 This plugin is licensed under the MIT License. See the LICENSE file for details.
