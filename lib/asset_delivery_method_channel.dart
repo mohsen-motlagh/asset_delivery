@@ -77,9 +77,9 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
     } else if (Platform.isIOS) {
       progressChannel.setMethodCallHandler((call) async {
         if (call.method == 'updateProgress') {
-          print('download progress ===== ${call.arguments}');
+          print('download progress ${call.arguments}');
           double? progress = call.arguments as double?;
-          print('download progress ===== $progress');
+          print('download progress $progress');
           onUpdate({'status': 'downloading', 'downloadProgress': progress});
         }
       });

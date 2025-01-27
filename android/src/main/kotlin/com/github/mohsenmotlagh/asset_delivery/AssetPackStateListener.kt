@@ -14,47 +14,47 @@ class AssetPackStateListener(
                 sendStatusToFlutter("Pending", 0.0)
             }
             AssetPackStatus.DOWNLOADING -> {
-                Log.d("====asset status====", "Downloading")
+                Log.d("asset status", "Downloading")
                 val downloaded = assetPackState.bytesDownloaded()
-                Log.d("====asset download bytes====", downloaded.toString())
+                Log.d("asset download bytes", downloaded.toString())
                 val totalSize = assetPackState.totalBytesToDownload()
-                Log.d("====asset totoal size====", totalSize.toString())
+                Log.d("asset totoal size", totalSize.toString())
                 val percent = downloaded.toDouble() / totalSize.toDouble()
-                Log.d("====asset percent====", percent.toString())
+                Log.d("asset percent", percent.toString())
                 sendStatusToFlutter("DOWNLOADING", percent)
             }
             AssetPackStatus.TRANSFERRING -> {
-                Log.d("====asset status====", "TRANSFERRING")
+                Log.d("asset status", "TRANSFERRING")
                 sendStatusToFlutter("TRANSFERRING", 0.99)
             }
             AssetPackStatus.COMPLETED -> {
-                Log.d("====asset status====", "COMPLETED")
+                Log.d("asset status", "COMPLETED")
                 sendStatusToFlutter("COMPLETED", 100.0)
             }
             AssetPackStatus.FAILED -> {
-                Log.d("====asset status====", "FAILED")
+                Log.d("asset status", "FAILED")
                 sendStatusToFlutter("Failed: ${assetPackState.errorCode()}", 0.0)
             }
             AssetPackStatus.CANCELED -> {
-                Log.d("====asset status====", "CANCELED")
+                Log.d("asset status", "CANCELED")
                 sendStatusToFlutter("CANCELED", 0.0)
             }
             AssetPackStatus.NOT_INSTALLED -> {
-                Log.d("====asset status====", "NOT_INSTALLED")
+                Log.d("asset status", "NOT_INSTALLED")
                 sendStatusToFlutter("Not Installed", 0.0)
             }
             AssetPackStatus.UNKNOWN -> {
-                Log.d("====asset status====", "UNKNOWN")
+                Log.d("asset status", "UNKNOWN")
                 sendStatusToFlutter("Unknown status.", 0.0)
             }
         }
     }
 
     private fun sendStatusToFlutter(status: String, downloadProgress: Double) {
-        Log.d("==== inside send to flutter====1111111", downloadProgress.toString())
+        Log.d("inside send to flutter", downloadProgress.toString())
         val statusMap = mapOf("status" to status,
         "downloadProgress" to downloadProgress)
-        Log.d("==== inside send to flutter====", statusMap.toString())
+        Log.d("inside send to flutter", statusMap.toString())
         methodChannel.invokeMethod("onAssetPackStatusChange", statusMap)
     }
 }
