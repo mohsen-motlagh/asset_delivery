@@ -138,7 +138,7 @@ You can test your iOS app by running it from Xcode on a real device or simulator
 4. Check for keyword "COMPLETED" from the status to be sure the assets completely downloaded
 
 ### Example
-[Example]*(https://github.com/mohsen-motlagh/asset_delivery_example)*
+[Example App](https://github.com/mohsen-motlagh/asset_delivery_example)
 
 ### Suppor
 Please support the plugin by give a thumbs up in pub.dev and github
