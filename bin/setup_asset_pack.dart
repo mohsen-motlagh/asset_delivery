@@ -23,7 +23,8 @@ Future<void> main(List<String> arguments) async {
 
   final lines = settingsContent.split('\n');
   if (!lines.contains(includeStatement)) {
-    final insertIndex = lines.indexWhere((line) => line.trim() == 'include ":app"');
+    final insertIndex =
+        lines.indexWhere((line) => line.trim() == 'include ":app"');
     if (insertIndex != -1) {
       lines.insert(insertIndex + 1, includeStatement);
     } else {
@@ -94,7 +95,8 @@ Future<void> main(List<String> arguments) async {
     appBuildGradleContent = appBuildGradleContent.replaceAllMapped(
       assetPacksPattern,
       (match) {
-        final existingPacks = match.group(1)!.split(',').map((e) => e.trim()).toList();
+        final existingPacks =
+            match.group(1)!.split(',').map((e) => e.trim()).toList();
         if (!existingPacks.contains('":$assetPackName"')) {
           existingPacks.add('":$assetPackName"');
           return 'assetPacks = [${existingPacks.join(', ')}]';
