@@ -117,8 +117,7 @@ You can test your iOS app by running it from Xcode on a real device or simulator
     ```
 
 ### 3. Retrieve Asset Path  
-
-    Get the local path to the downloaded assets using the following code:  
+  Get the local path to the downloaded assets using the following code:  
 
     ```dart
     final path = await assetDelivery.getAssetPackPath(
