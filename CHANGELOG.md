@@ -13,3 +13,6 @@
 
 3. **Updated `getAssetPackPath` Method**
    - Introduced a new required parameter `fileExtension` to specify the file type when fetching the asset pack path. This ensures assets are correctly identified and fetched.
+
+## 1.1.0
+   - Improve the script for adding the necessary code for Android
