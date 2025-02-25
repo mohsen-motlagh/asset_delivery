@@ -26,6 +26,24 @@ flutter:
   generate: true      
 ```
 
+## Android Integration
+This script sets up Play Asset Delivery on the Android side by:
+- Adding the asset pack to `settings.gradle(.kts)`.
+- Creating the necessary `build.gradle.kts` file for the asset pack.
+- Generating an `AndroidManifest.xml` for the asset pack.
+- Updating `build.gradle(.kts)` in the app module to include the asset pack.
+
+For more details and manual setup guidance, refer to the official Play Asset Delivery integration guide:  
+[Android Developer Guide - Play Asset Delivery](https://developer.android.com/guide/playcore/asset-delivery/integrate-java)
+
+This link provides additional details on integrating asset packs, ensuring the script has correctly applied the required changes.
+For making sure the script doing the job correctly yoou can also check the example app and compare it with yours.
+
+## Notes
+- The script supports both Groovy (`.gradle`) and Kotlin DSL (`.gradle.kts`).
+- If any required files are missing, it will attempt to create them automatically.
+- Ensure you have the required Play Asset Delivery dependencies in your `build.gradle` files.
+
 ## Setup
 
 ### Android
@@ -93,6 +111,9 @@ flutter:
     - Add your **Asset Pack Name** (this should match the name used for Android).
 
 4. Ensure all assets are tagged appropriately.
+
+## Notes
+If you add the tag for the folder it is enough and you do not need to add it for each asset seperately, xcode will do it itself automatically, but you can check the correctness with clicking on the asssets and see if they have the same tag as the parent folder. This will generate the content.json file for each folder and each asset, you do not need to modify it.
 
 ---
 
