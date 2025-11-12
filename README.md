@@ -4,6 +4,13 @@
 
 The **Asset Delivery Plugin** simplifies managing **on-demand asset delivery** in Flutter applications. It integrates with Play Asset Delivery (Android) and On-Demand Resources (iOS), enabling dynamic asset downloads and seamless user experiences.
 
+## Requirements
+
+- **Flutter:** 3.24.0 or newer
+- **Dart SDK:** 3.5.2 or newer
+- **Android toolchain:** Android Gradle Plugin 8.5.x with Kotlin 1.9.24
+- **iOS:** iOS 12 or newer
+
 ### Key Features
 - **On-Demand Asset Delivery:** Download and access assets dynamically at runtime.
 - **Customizable Resource Management:** Flexible naming patterns and ranges for asset files.
@@ -23,7 +30,9 @@ dependencies:
       ref: main
 
 flutter:
-  generate: true      
+  generate: true
+
+After updating, run `flutter pub get` to install the latest dependencies.
 ```
 
 ## Setup

@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'asset_delivery'
-  s.version          = '0.0.1'
+  s.version          = '1.2.0'
   s.summary          = 'A new Flutter plugin project.'
   s.description      = <<-DESC
 This plugin helps deliver assets dynamically for iOS and Android..
