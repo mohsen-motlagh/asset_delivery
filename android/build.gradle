@@ -3,14 +3,14 @@ group = "com.github.mohsenmotlagh.asset_delivery"
 version = "1.0-SNAPSHOT"
 
 buildscript {
-    ext.kotlin_version = "1.8.22"
+    ext.kotlin_version = "1.9.24"
     repositories {
         google()
         mavenCentral()
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:8.1.0")
+        classpath("com.android.tools.build:gradle:8.5.2")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
     }
 }
@@ -70,6 +70,6 @@ android {
 
 dependencies {
     implementation "com.google.android.play:asset-delivery:2.2.2"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1"
     implementation 'com.google.android.play:asset-delivery-ktx:2.2.2'
 }
