@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'asset_delivery_method_channel.dart';
@@ -25,11 +27,16 @@ abstract class AssetDeliveryPlatform extends PlatformInterface {
 
   Future<void> fetch(String assetPackName);
   Future<void> fetchAssetPackState(String assetPackName);
+
+  Stream<StatusMap> watchAssetPackStatus(String assetPackName);
+
   Future<String?> getAssetPackPath({
     required String assetPackName,
     required int count,
     required String namingPattern,
     required String fileExtension,
   });
+
+  Future<Uint8List?> getInstallTimeAssetBytes(String relativeAssetPath);
   void getAssetPackStatus(Function(Map<String, dynamic>) onUpdate);
 }

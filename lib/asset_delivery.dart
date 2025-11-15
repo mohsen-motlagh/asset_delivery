@@ -1,3 +1,7 @@
+import 'dart:typed_data';
+
+import 'package:asset_delivery/asset_delivery_method_channel.dart';
+
 import 'asset_delivery_platform_interface.dart';
 
 class AssetDelivery {
@@ -23,6 +27,15 @@ class AssetDelivery {
       namingPattern: namingPattern,
       fileExtension: fileExtension,
     );
+  }
+
+  static Future<Uint8List?> getInstallTimeAssetBytes(String relativeAssetPath) {
+    return AssetDeliveryPlatform.instance
+        .getInstallTimeAssetBytes(relativeAssetPath);
+  }
+
+  static Stream<StatusMap> watchAssetPackStatus(String assetPackName) {
+    return AssetDeliveryPlatform.instance.watchAssetPackStatus(assetPackName);
   }
 
   /// Sets up a listener for asset pack state updates.

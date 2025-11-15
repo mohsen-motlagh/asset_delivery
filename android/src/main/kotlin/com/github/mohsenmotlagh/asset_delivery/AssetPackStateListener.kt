@@ -1,3 +1,5 @@
+package com.github.mohsenmotlagh.asset_delivery
+
 import android.util.Log
 import com.google.android.play.core.assetpacks.AssetPackState
 import com.google.android.play.core.assetpacks.model.AssetPackStatus
@@ -18,7 +20,7 @@ class AssetPackStateListener(
                 val downloaded = assetPackState.bytesDownloaded()
                 Log.d("asset download bytes", downloaded.toString())
                 val totalSize = assetPackState.totalBytesToDownload()
-                Log.d("asset totoal size", totalSize.toString())
+                Log.d("asset total size", totalSize.toString())
                 val percent = downloaded.toDouble() / totalSize.toDouble()
                 Log.d("asset percent", percent.toString())
                 sendStatusToFlutter("DOWNLOADING", percent)
@@ -29,7 +31,7 @@ class AssetPackStateListener(
             }
             AssetPackStatus.COMPLETED -> {
                 Log.d("asset status", "COMPLETED")
-                sendStatusToFlutter("COMPLETED", 100.0)
+                sendStatusToFlutter("COMPLETED", 1.0)
             }
             AssetPackStatus.FAILED -> {
                 Log.d("asset status", "FAILED")
@@ -46,6 +48,11 @@ class AssetPackStateListener(
             AssetPackStatus.UNKNOWN -> {
                 Log.d("asset status", "UNKNOWN")
                 sendStatusToFlutter("Unknown status.", 0.0)
+            }
+
+            AssetPackStatus.WAITING_FOR_WIFI -> {
+                Log.d("asset status", "WAITING_FOR_WIFI")
+                sendStatusToFlutter("Waiting For Wifi", 0.0)
             }
         }
     }

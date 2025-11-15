@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -13,6 +14,8 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
   final progressChannel = const MethodChannel('on_demand_resources_progress');
 
   static void Function(String status, double progress)? onStatusChange;
+
+  StreamController<StatusMap>? _statusController;
 
   /// Fetches the specified asset pack from the platform.
   ///
@@ -106,6 +109,35 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
     return assetPath;
   }
 
+  /// Gets the file path for the specified install-time asset pack.
+  ///
+  /// The install time asset pack is fetched from the split-APK
+  /// Parameters:
+  /// - [assetPackName]: The name of the asset pack to fetch.
+  ///
+  /// Returns:
+  /// - A [String] representing the path to the asset pack folder, or `null`
+  ///   if an error occurs.
+  ///
+  /// Throws:
+  /// - [PlatformException] if an error occurs on the platform side.
+  /// - [UnsupportedError] if the platform is unsupported.
+  @override
+  Future<Uint8List?> getInstallTimeAssetBytes(String relativeAssetPath) async {
+    Uint8List? assetPath;
+    try {
+      assetPath = await methodChannel.invokeMethod(
+          'getInstallTimeAssetBytes', {'assetPack': relativeAssetPath});
+    } on PlatformException catch (e) {
+      debugPrint("Failed to fetch asset pack path: ${e.message}");
+      return null;
+    } on UnsupportedError catch (e) {
+      debugPrint("Error: ${e.message}");
+      return null;
+    }
+    return assetPath;
+  }
+
   /// Subscribes to asset pack status updates.
   ///
   /// This method listens for updates about the status of asset pack downloads
@@ -142,6 +174,48 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
     } else {
       debugPrint('Unsupported platform for progress updates');
     }
+  }
+
+  @override
+  Stream<StatusMap> watchAssetPackStatus(String assetPackName) {
+    // Return existing stream if already created
+    if (_statusController != null && !_statusController!.isClosed) {
+      return _statusController!.stream;
+    }
+
+    _statusController = StreamController<StatusMap>.broadcast(
+      onListen: _startListening,
+      onCancel: _stopListening,
+    );
+
+    return _statusController!.stream;
+  }
+
+  void _startListening() {
+    if (Platform.isAndroid) {
+      methodChannel.setMethodCallHandler((call) async {
+        if (call.method == 'onAssetPackStatusChange') {
+          Map<String, dynamic> statusMap =
+              Map<String, dynamic>.from(call.arguments);
+          _statusController?.add(StatusMap.fromJson(statusMap));
+        }
+      });
+    } else if (Platform.isIOS) {
+      progressChannel.setMethodCallHandler((call) async {
+        if (call.method == 'updateProgress') {
+          double? progress = call.arguments as double?;
+          _statusController?.add(StatusMap.fromJson({
+            'status': 'downloading',
+            'downloadProgress': progress ?? 0.0,
+          }));
+        }
+      });
+    }
+  }
+
+  void _stopListening() {
+    methodChannel.setMethodCallHandler(null);
+    progressChannel.setMethodCallHandler(null);
   }
 }
 

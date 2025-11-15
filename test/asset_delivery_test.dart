@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:asset_delivery/asset_delivery.dart';
 import 'package:asset_delivery/asset_delivery_method_channel.dart';
 import 'package:asset_delivery/asset_delivery_platform_interface.dart';
@@ -32,6 +34,17 @@ class MockAssetDeliveryPlatform
     return null;
 
     // Simulate fetching asset pack state.
+  }
+
+  @override
+  Future<Uint8List?> getInstallTimeAssetBytes(String relativeAssetPath) async {
+    return null;
+    // Simulate fetching asset pack state.
+  }
+
+  @override
+  Stream<StatusMap> watchAssetPackStatus(String assetPackName) {
+    return const Stream<StatusMap>.empty();
   }
 }
 
