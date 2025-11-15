@@ -9,16 +9,33 @@ Future<void> main(List<String> arguments) async {
     exit(1);
   }
   final assetPackName = arguments[0];
+  final deliveryType = arguments.length > 1 ? arguments[1] : 'on-demand';
+  if (deliveryType != 'on-demand' &&
+      deliveryType != 'install-time' &&
+      deliveryType != 'fast-follow') {
+    print('Invalid delivery type: $deliveryType');
+    print(
+        'Usage: dart run setup_asset_pack.dart <assetPackName> <deliveryType>. Allowed types are: on-demand, install-time, fast-follow');
+    exit(1);
+  }
   final androidDir = Directory('android/$assetPackName');
   final rootDir = Directory.current.path;
 
-  final settingsFile = File('$rootDir/android/settings.gradle');
+  File settingsFile = File('$rootDir/android/settings.gradle');
+  bool isKts = false;
   if (!settingsFile.existsSync()) {
-    print('Error: settings.gradle not found in the Android directory.');
-    exit(1);
+    settingsFile = File('$rootDir/android/settings.gradle.kts');
+    isKts = true;
+
+    if (!settingsFile.existsSync()) {
+      print(
+          'Error: settings.gradle or settings.gradle.kts not found in the Android directory.');
+      exit(1);
+    }
   }
 
-  final includeStatement = "include ':$assetPackName'";
+  final includeStatement =
+      isKts ? 'include(":$assetPackName")' : "include ':$assetPackName'";
   final settingsContent = settingsFile.readAsStringSync();
 
   final lines = settingsContent.split('\n');
@@ -51,7 +68,7 @@ Future<void> main(List<String> arguments) async {
         assetPack {
             packName.set("$assetPackName")
             dynamicDelivery {
-                deliveryType.set("on-demand")
+                deliveryType.set("$deliveryType")
             }
         }
       '''
@@ -70,7 +87,7 @@ Future<void> main(List<String> arguments) async {
           <dist:module dist:type="asset-pack">
             <dist:fusing dist:include="true" />    
             <dist:delivery>
-              <dist:on-demand/>
+              <dist:$deliveryType/>
             </dist:delivery>
           </dist:module>
         </manifest>
@@ -81,13 +98,18 @@ Future<void> main(List<String> arguments) async {
     print('Asset pack directory "$assetPackName" already exists.');
   }
 
-  final appBuildGradleFile = File('$rootDir/android/app/build.gradle');
+  File appBuildGradleFile = File('$rootDir/android/app/build.gradle');
   if (!appBuildGradleFile.existsSync()) {
-    print('Error: build.gradle not found in the android/app directory.');
-    exit(1);
+    appBuildGradleFile = File('$rootDir/android/app/build.gradle.kts');
+    if (!appBuildGradleFile.existsSync()) {
+      print('Error: build.gradle not found in the android/app directory.');
+      exit(1);
+    }
   }
 
-  final assetPacksPattern = RegExp(r'assetPacks\s*=\s*\[([^\]]*)\]');
+  final assetPacksPattern = RegExp(
+    r'assetPacks\s*(?:=|\+=)\s*(?:\[([^\]]*)\]|listOf\(([^)]*)\))',
+  );
   String appBuildGradleContent = appBuildGradleFile.readAsStringSync();
 
   if (assetPacksPattern.hasMatch(appBuildGradleContent)) {
@@ -95,25 +117,39 @@ Future<void> main(List<String> arguments) async {
     appBuildGradleContent = appBuildGradleContent.replaceAllMapped(
       assetPacksPattern,
       (match) {
-        final existingPacks =
-            match.group(1)!.split(',').map((e) => e.trim()).toList();
+        // Determine whether it’s Groovy or Kotlin style
+        final isGroovy = match.group(1) != null;
+        final existingPacksRaw = match.group(1) ?? match.group(2) ?? '';
+
+        // Normalize existing list items
+        final existingPacks = existingPacksRaw
+            .split(',')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toList();
+
         if (!existingPacks.contains('":$assetPackName"')) {
           existingPacks.add('":$assetPackName"');
-          return 'assetPacks = [${existingPacks.join(', ')}]';
+          // Rebuild line in the same format as before
+          if (isGroovy) {
+            return 'assetPacks = [${existingPacks.join(', ')}]';
+          } else {
+            return 'assetPacks += listOf(${existingPacks.join(', ')})';
+          }
         }
         return match.group(0)!; // No change needed
       },
     );
-    print('Updated assetPacks in app/build.gradle with ":$assetPackName"');
+    print('✅ Updated assetPacks in app/build.gradle with ":$assetPackName"');
   } else {
     // Add a new `assetPacks` property if it doesn't exist
     final androidBlockPattern = RegExp(r'android\s*{');
     if (androidBlockPattern.hasMatch(appBuildGradleContent)) {
       appBuildGradleContent = appBuildGradleContent.replaceFirst(
         androidBlockPattern,
-        'android {\n    assetPacks = [":$assetPackName"]',
+        'android {\n    ${isKts ? 'assetPacks += listOf($assetPackName)' : 'assetPacks = [":$assetPackName"]'}',
       );
-      print('Added assetPacks to app/build.gradle with ":$assetPackName"');
+      print('✅  Added assetPacks to app/build.gradle with ":$assetPackName"');
     } else {
       print('Error: Could not locate the `android` block in app/build.gradle');
       exit(1);
