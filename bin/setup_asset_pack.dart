@@ -34,8 +34,9 @@ Future<void> main(List<String> arguments) async {
     }
   }
 
-  final includeStatement =
-      isSettingsKts ? 'include(":$assetPackName")' : "include ':$assetPackName'";
+  final includeStatement = isSettingsKts
+      ? 'include(":$assetPackName")'
+      : "include ':$assetPackName'";
   final settingsContent = settingsFile.readAsStringSync();
 
   final lines = settingsContent.split('\n');
