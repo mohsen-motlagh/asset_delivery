@@ -106,6 +106,35 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
     return assetPath;
   }
 
+  /// Gets the file path for the specified install-time asset pack.
+  ///
+  /// The install time asset pack is fetched from the split-APK
+  /// Parameters:
+  /// - [assetPackName]: The name of the asset pack to fetch.
+  ///
+  /// Returns:
+  /// - A [String] representing the path to the asset pack folder, or `null`
+  ///   if an error occurs.
+  ///
+  /// Throws:
+  /// - [PlatformException] if an error occurs on the platform side.
+  /// - [UnsupportedError] if the platform is unsupported.
+  @override
+  Future<Uint8List?> getInstallTimeAssetBytes(String relativeAssetPath) async {
+    Uint8List? assetPath;
+    try {
+      assetPath = await methodChannel.invokeMethod(
+          'getInstallTimeAssetBytes', {'assetPack': relativeAssetPath});
+    } on PlatformException catch (e) {
+      debugPrint("Failed to fetch asset pack path: ${e.message}");
+      return null;
+    } on UnsupportedError catch (e) {
+      debugPrint("Error: ${e.message}");
+      return null;
+    }
+    return assetPath;
+  }
+
   /// Subscribes to asset pack status updates.
   ///
   /// This method listens for updates about the status of asset pack downloads
@@ -143,6 +172,7 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
       debugPrint('Unsupported platform for progress updates');
     }
   }
+
 }
 
 /// Represents the status of an asset pack download.
