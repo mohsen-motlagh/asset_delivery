@@ -22,10 +22,10 @@ Future<void> main(List<String> arguments) async {
   final rootDir = Directory.current.path;
 
   File settingsFile = File('$rootDir/android/settings.gradle');
-  bool isKts = false;
+  bool isSettingsKts = false;
   if (!settingsFile.existsSync()) {
     settingsFile = File('$rootDir/android/settings.gradle.kts');
-    isKts = true;
+    isSettingsKts = true;
 
     if (!settingsFile.existsSync()) {
       print(
@@ -35,13 +35,19 @@ Future<void> main(List<String> arguments) async {
   }
 
   final includeStatement =
-      isKts ? 'include(":$assetPackName")' : "include ':$assetPackName'";
+      isSettingsKts ? 'include(":$assetPackName")' : "include ':$assetPackName'";
   final settingsContent = settingsFile.readAsStringSync();
 
   final lines = settingsContent.split('\n');
   if (!lines.contains(includeStatement)) {
-    final insertIndex =
-        lines.indexWhere((line) => line.trim() == 'include ":app"');
+    // The app include is written as `include ":app"` in Groovy and
+    // `include(":app")` in Kotlin DSL, so match either form.
+    final insertIndex = lines.indexWhere((line) {
+      final trimmed = line.trim();
+      return trimmed == 'include ":app"' ||
+          trimmed == "include ':app'" ||
+          trimmed == 'include(":app")';
+    });
     if (insertIndex != -1) {
       lines.insert(insertIndex + 1, includeStatement);
     } else {
@@ -98,9 +104,13 @@ Future<void> main(List<String> arguments) async {
     print('Asset pack directory "$assetPackName" already exists.');
   }
 
+  // Tracked separately from [isSettingsKts]: a project may pair a Groovy
+  // settings file with a Kotlin DSL app build file, or the other way around.
   File appBuildGradleFile = File('$rootDir/android/app/build.gradle');
+  bool isAppKts = false;
   if (!appBuildGradleFile.existsSync()) {
     appBuildGradleFile = File('$rootDir/android/app/build.gradle.kts');
+    isAppKts = true;
     if (!appBuildGradleFile.existsSync()) {
       print('Error: build.gradle not found in the android/app directory.');
       exit(1);
@@ -147,7 +157,7 @@ Future<void> main(List<String> arguments) async {
     if (androidBlockPattern.hasMatch(appBuildGradleContent)) {
       appBuildGradleContent = appBuildGradleContent.replaceFirst(
         androidBlockPattern,
-        'android {\n    ${isKts ? 'assetPacks += listOf($assetPackName)' : 'assetPacks = [":$assetPackName"]'}',
+        'android {\n    ${isAppKts ? 'assetPacks += listOf(":$assetPackName")' : 'assetPacks = [":$assetPackName"]'}',
       );
       print('✅  Added assetPacks to app/build.gradle with ":$assetPackName"');
     } else {
