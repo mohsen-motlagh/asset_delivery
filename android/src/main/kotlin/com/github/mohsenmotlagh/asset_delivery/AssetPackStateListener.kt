@@ -3,65 +3,55 @@ package com.github.mohsenmotlagh.asset_delivery
 import android.util.Log
 import com.google.android.play.core.assetpacks.AssetPackState
 import com.google.android.play.core.assetpacks.model.AssetPackStatus
-import io.flutter.plugin.common.MethodChannel
 
+private const val TAG = "AssetDelivery"
+
+/**
+ * Translates Play Asset Delivery state callbacks into the platform-neutral
+ * payload consumed by the Dart side.
+ *
+ * The status strings emitted here must stay in sync with the `AssetPackStatus`
+ * enum in `lib/src/asset_pack_status.dart`; they are matched by name.
+ */
 class AssetPackStateListener(
-    private var methodChannel: MethodChannel
+    private val onUpdate: (Map<String, Any?>) -> Unit
 ) : (AssetPackState) -> Unit {
 
     override fun invoke(assetPackState: AssetPackState) {
-        when (assetPackState.status()) {
-            AssetPackStatus.PENDING -> {
-                Log.d("====asset status====", "Pending")
-                sendStatusToFlutter("Pending", 0.0)
-            }
-            AssetPackStatus.DOWNLOADING -> {
-                Log.d("asset status", "Downloading")
-                val downloaded = assetPackState.bytesDownloaded()
-                Log.d("asset download bytes", downloaded.toString())
-                val totalSize = assetPackState.totalBytesToDownload()
-                Log.d("asset total size", totalSize.toString())
-                val percent = downloaded.toDouble() / totalSize.toDouble()
-                Log.d("asset percent", percent.toString())
-                sendStatusToFlutter("DOWNLOADING", percent)
-            }
-            AssetPackStatus.TRANSFERRING -> {
-                Log.d("asset status", "TRANSFERRING")
-                sendStatusToFlutter("TRANSFERRING", 0.99)
-            }
-            AssetPackStatus.COMPLETED -> {
-                Log.d("asset status", "COMPLETED")
-                sendStatusToFlutter("COMPLETED", 1.0)
-            }
-            AssetPackStatus.FAILED -> {
-                Log.d("asset status", "FAILED")
-                sendStatusToFlutter("Failed: ${assetPackState.errorCode()}", 0.0)
-            }
-            AssetPackStatus.CANCELED -> {
-                Log.d("asset status", "CANCELED")
-                sendStatusToFlutter("CANCELED", 0.0)
-            }
-            AssetPackStatus.NOT_INSTALLED -> {
-                Log.d("asset status", "NOT_INSTALLED")
-                sendStatusToFlutter("Not Installed", 0.0)
-            }
-            AssetPackStatus.UNKNOWN -> {
-                Log.d("asset status", "UNKNOWN")
-                sendStatusToFlutter("Unknown status.", 0.0)
-            }
-
-            AssetPackStatus.WAITING_FOR_WIFI -> {
-                Log.d("asset status", "WAITING_FOR_WIFI")
-                sendStatusToFlutter("Waiting For Wifi", 0.0)
-            }
+        val status = when (assetPackState.status()) {
+            AssetPackStatus.PENDING -> "pending"
+            AssetPackStatus.DOWNLOADING -> "downloading"
+            AssetPackStatus.TRANSFERRING -> "transferring"
+            AssetPackStatus.COMPLETED -> "completed"
+            AssetPackStatus.FAILED -> "failed"
+            AssetPackStatus.CANCELED -> "canceled"
+            AssetPackStatus.NOT_INSTALLED -> "notInstalled"
+            AssetPackStatus.WAITING_FOR_WIFI -> "waitingForWifi"
+            else -> "unknown"
         }
-    }
 
-    private fun sendStatusToFlutter(status: String, downloadProgress: Double) {
-        Log.d("inside send to flutter", downloadProgress.toString())
-        val statusMap = mapOf("status" to status,
-        "downloadProgress" to downloadProgress)
-        Log.d("inside send to flutter", statusMap.toString())
-        methodChannel.invokeMethod("onAssetPackStatusChange", statusMap)
+        val downloaded = assetPackState.bytesDownloaded()
+        val total = assetPackState.totalBytesToDownload()
+
+        // A resident pack reports total == 0, which would make the ratio NaN.
+        val progress = when {
+            status == "completed" -> 1.0
+            total > 0L -> (downloaded.toDouble() / total.toDouble()).coerceIn(0.0, 1.0)
+            else -> 0.0
+        }
+
+        Log.d(TAG, "${assetPackState.name()}: $status ($downloaded/$total)")
+
+        onUpdate(
+            mapOf(
+                "name" to assetPackState.name(),
+                "status" to status,
+                "downloadProgress" to progress,
+                "bytesDownloaded" to downloaded,
+                "totalBytesToDownload" to total,
+                "errorCode" to
+                    assetPackState.errorCode().takeIf { status == "failed" }
+            )
+        )
     }
 }

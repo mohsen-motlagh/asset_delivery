@@ -102,39 +102,124 @@ You can test your iOS app by running it from Xcode on a real device or simulator
 
 ## Usage
 
-1. **Download Assets**  
-   On Android devices, download and install assets dynamically using:  
-   ```dart
-   await assetDelivery.fetch("$assetpackName");
+All methods on `AssetDelivery` are **static** — there is no instance to create.
 
-   - If the assets already exist on the device, the download will be skipped automatically.
-   - On iOS, this step is not necessary as assets are accessed directly.
+### 1. Track download status
 
-2. Track Download Progress
-    During the download, track the status of the asset pack by calling:
-    ```
-    await assetDelivery.getAssetPackStatus();
-    ```
+Subscribe *before* calling `fetch`, so no early updates are missed. The stream
+is filtered by asset pack, so several packs can be tracked independently, and
+any number of listeners can subscribe to the same pack.
 
-### 3. Retrieve Asset Path  
-  Get the local path to the downloaded assets using the following code:  
+```dart
+import 'package:asset_delivery/asset_delivery.dart';
 
-  ```dart
-    final path = await assetDelivery.getAssetPackPath(
-      assetPackName: widget.assetPackName,
-      count: widget.assetsCount,
-      namingPattern: widget.namingPattern,
-      fileExtension: widget.fileExtension,
-    );
-    Parameters:
+final subscription =
+    AssetDelivery.watchAssetPackStatus('my_asset_pack').listen((update) {
+  switch (update.status) {
+    case AssetPackStatus.downloading:
+      print('${(update.downloadProgress * 100).toStringAsFixed(0)}%');
+    case AssetPackStatus.completed:
+      print('Ready to use');
+    case AssetPackStatus.failed:
+      print('Failed with code ${update.errorCode}');
+    default:
+      break;
+  }
+});
+```
 
-    assetPackName: The name of the asset pack.
-    count: The number of assets in the pack.
-    namingPattern: The naming convention for the assets.
-    fileExtension: The file extension of the assets (e.g., 'mp3').
-  ```
+`AssetPackStatusUpdate` carries:
 
-4. Check for keyword "COMPLETED" from the status to be sure the assets completely downloaded
+| Field | Description |
+| --- | --- |
+| `name` | The asset pack (Android) or ODR tag (iOS) this update is about |
+| `status` | An `AssetPackStatus` value |
+| `downloadProgress` | `0.0`–`1.0`; always `1.0` once completed |
+| `bytesDownloaded` | Bytes transferred so far (Android; `0` on iOS) |
+| `totalBytesToDownload` | Total size, or `0` when not yet known |
+| `errorCode` | Platform error code, set only when `status` is `failed` |
+
+The stream never closes. Cancel the subscription once
+`update.status.isTerminal` is true:
+
+```dart
+if (update.status.isTerminal) subscription.cancel();
+```
+
+`AssetPackStatus` values are `pending`, `downloading`, `transferring`,
+`completed`, `failed`, `canceled`, `notInstalled`, `waitingForWifi` and
+`unknown`. Only `downloading`, `completed` and `failed` occur on iOS.
+
+### 2. Download assets
+
+```dart
+await AssetDelivery.fetch('my_asset_pack');
+```
+
+- If the assets are already on the device, the download is skipped.
+- On iOS this step is not required; assets are fetched by `getAssetPackPath`.
+
+### 3. Retrieve the asset path
+
+```dart
+final path = await AssetDelivery.getAssetPackPath(
+  assetPackName: 'my_asset_pack',
+  count: 10,
+  namingPattern: 'ASSET_%d',
+  fileExtension: 'mp3',
+);
+```
+
+| Parameter | Description |
+| --- | --- |
+| `assetPackName` | The asset pack name (Android) or ODR tag (iOS) |
+| `count` | Number of assets in the pack — **iOS only** |
+| `namingPattern` | Naming convention, e.g. `ASSET_%d` — **iOS only** |
+| `fileExtension` | File extension, e.g. `mp3` — **iOS only** |
+
+The last three are ignored on Android, where the pack is returned as a
+directory. On iOS the assets are enumerated by name and copied out of the
+bundle, which is why the count and pattern are needed.
+
+Returns `null` if the path could not be resolved.
+
+### 4. Read an install-time asset (Android)
+
+Install-time packs are fused into the APK rather than stored as a pack
+location, so they are read as bytes rather than by path:
+
+```dart
+final bytes = await AssetDelivery.getInstallTimeAssetBytes('images/logo.png');
+```
+
+---
+
+## Migrating from 1.1.0
+
+`getAssetPackStatus` and `StatusMap` are deprecated and will be removed in
+**2.0.0**. They still behave exactly as before, so upgrading to 1.2.0 requires
+no changes.
+
+```dart
+// Before — one listener only, no way to tell which pack an update was for,
+// and status compared against a raw string.
+AssetDelivery.getAssetPackStatus((status) {
+  if (status['status'] == 'COMPLETED') { /* ready */ }
+});
+
+// After
+AssetDelivery.watchAssetPackStatus('my_asset_pack').listen((update) {
+  if (update.status == AssetPackStatus.completed) { /* ready */ }
+});
+```
+
+Two differences to be aware of when you migrate:
+
+- The new API reports completion as `downloadProgress == 1.0`. The deprecated
+  API reported `100.0` on Android, on a scale where every other value was a
+  `0.0`–`1.0` fraction.
+- A failure code is now a separate `errorCode` field rather than being
+  embedded in the status string as `'Failed: -6'`.
 
 ### Example
 [Example App](https://github.com/mohsen-motlagh/asset_delivery_example)

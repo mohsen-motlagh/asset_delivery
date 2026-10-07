@@ -1,18 +1,43 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'asset_delivery_platform_interface.dart';
+import 'src/asset_pack_status.dart';
 
 /// An implementation of [AssetDeliveryPlatform] that uses method channels.
 class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
   final methodChannel = const MethodChannel('asset_delivery');
-  final progressChannel = const MethodChannel('on_demand_resources_progress');
 
+  /// Carries asset pack status updates from the host to Dart.
+  ///
+  /// An [EventChannel] rather than a method-call handler, because a
+  /// [MethodChannel] supports only one handler at a time — which made it
+  /// impossible for more than one caller to observe download status.
+  @visibleForTesting
+  final eventChannel = const EventChannel('asset_delivery/events');
+
+  @Deprecated(
+    'Unused and never emitted. Use watchAssetPackStatus instead. '
+    'Will be removed in 2.0.0.',
+  )
   static void Function(String status, double progress)? onStatusChange;
+
+  Stream<AssetPackStatusUpdate>? _statuses;
+  StreamSubscription<AssetPackStatusUpdate>? _legacySubscription;
+
+  /// Lazily-created broadcast view over the native event stream.
+  Stream<AssetPackStatusUpdate> get _statusStream {
+    return _statuses ??= eventChannel
+        .receiveBroadcastStream()
+        .where((event) => event is Map)
+        .map((event) =>
+            AssetPackStatusUpdate.fromMap(event as Map<Object?, Object?>));
+  }
 
   /// Fetches the specified asset pack from the platform.
   ///
@@ -135,47 +160,78 @@ class MethodChannelAssetDelivery extends AssetDeliveryPlatform {
     return assetPath;
   }
 
-  /// Subscribes to asset pack status updates.
-  ///
-  /// This method listens for updates about the status of asset pack downloads
-  /// (e.g., "downloading", "completed") and passes the information to the
-  /// provided callback function.
-  ///
-  /// - [onUpdate]: A callback function that takes a [Map<String, dynamic>] with
-  ///   status details.
-  ///
-  /// Supported platforms:
-  /// - Android: Listens for `onAssetPackStatusChange` events.
-  /// - iOS: Listens for `updateProgress` events.
-  ///
-  /// Logs a message if the platform is unsupported.
   @override
-  void getAssetPackStatus(Function(Map<String, dynamic>) onUpdate) {
-    if (Platform.isAndroid) {
-      methodChannel.setMethodCallHandler((call) async {
-        if (call.method == 'onAssetPackStatusChange') {
-          Map<String, dynamic> statusMap =
-              Map<String, dynamic>.from(call.arguments);
-          onUpdate(statusMap);
-        }
-      });
-    } else if (Platform.isIOS) {
-      progressChannel.setMethodCallHandler((call) async {
-        if (call.method == 'updateProgress') {
-          print('download progress ${call.arguments}');
-          double? progress = call.arguments as double?;
-          print('download progress $progress');
-          onUpdate({'status': 'downloading', 'downloadProgress': progress});
-        }
-      });
-    } else {
-      debugPrint('Unsupported platform for progress updates');
-    }
+  Stream<AssetPackStatusUpdate> watchAssetPackStatus(String assetPackName) {
+    return _statusStream.where((update) => update.name == assetPackName);
   }
 
+  /// Subscribes to asset pack status updates.
+  ///
+  /// Reimplemented on top of [watchAssetPackStatus]; the payload is translated
+  /// back to the 1.1.0 wire format so existing callers keep working unchanged.
+  @Deprecated(
+    'Use watchAssetPackStatus, which is typed and reports which pack each '
+    'update belongs to. Will be removed in 2.0.0.',
+  )
+  @override
+  void getAssetPackStatus(Function(Map<String, dynamic>) onUpdate) {
+    // 1.1.0 replaced the handler on each call rather than adding a second one.
+    _legacySubscription?.cancel();
+    _legacySubscription = _statusStream.listen((update) {
+      onUpdate(legacyPayload(update, isIOS: Platform.isIOS));
+    });
+  }
+
+  /// Rebuilds the pre-2.0.0 status map from a typed update.
+  ///
+  /// The two platforms shipped different vocabularies in 1.1.0 — Android sent
+  /// `'DOWNLOADING'`, iOS sent `'downloading'` — and Android reported completion
+  /// as `100.0` on a scale where every other value was a 0–1 fraction. Those
+  /// quirks are reproduced here rather than fixed, so that upgrading to 1.2.0
+  /// changes nothing for callers still using [getAssetPackStatus]. This function
+  /// is deleted together with that method in 2.0.0.
+  ///
+  /// States a platform could not produce in 1.1.0 fall through to the new
+  /// lowercase enum name; iOS only ever emitted `'downloading'`.
+  @visibleForTesting
+  static Map<String, dynamic> legacyPayload(
+    AssetPackStatusUpdate update, {
+    required bool isIOS,
+  }) {
+    if (isIOS) {
+      return {
+        'status': update.status == AssetPackStatus.downloading
+            ? 'downloading'
+            : update.status.name,
+        'downloadProgress': update.downloadProgress,
+      };
+    }
+    return {
+      'status': switch (update.status) {
+        AssetPackStatus.pending => 'Pending',
+        AssetPackStatus.downloading => 'DOWNLOADING',
+        AssetPackStatus.transferring => 'TRANSFERRING',
+        AssetPackStatus.completed => 'COMPLETED',
+        AssetPackStatus.failed => 'Failed: ${update.errorCode}',
+        AssetPackStatus.canceled => 'CANCELED',
+        AssetPackStatus.notInstalled => 'Not Installed',
+        AssetPackStatus.waitingForWifi => 'Waiting For Wifi',
+        AssetPackStatus.unknown => 'Unknown status.',
+      },
+      'downloadProgress': switch (update.status) {
+        AssetPackStatus.completed => 100.0,
+        AssetPackStatus.transferring => 0.99,
+        _ => update.downloadProgress,
+      },
+    };
+  }
 }
 
 /// Represents the status of an asset pack download.
+@Deprecated(
+  'Use AssetPackStatusUpdate, which carries the pack name, byte counts and '
+  'error code. Will be removed in 2.0.0.',
+)
 class StatusMap {
   String status;
   double downloadProgress;

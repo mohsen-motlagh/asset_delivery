@@ -9,6 +9,8 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 class MockAssetDeliveryPlatform
     with MockPlatformInterfaceMixin
     implements AssetDeliveryPlatform {
+  String? lastWatchedPack;
+
   @override
   Future<void> fetch(String assetPackName) async {
     // Simulate a successful fetch call.
@@ -19,6 +21,7 @@ class MockAssetDeliveryPlatform
     // Simulate fetching asset pack state.
   }
 
+  @Deprecated('Mirrors the deprecated platform member.')
   @override
   void getAssetPackStatus(Function(Map<String, dynamic>) onUpdate) {
     // Simulate setting a listener.
@@ -41,6 +44,44 @@ class MockAssetDeliveryPlatform
     return null;
     // Simulate fetching asset pack state.
   }
+
+  @override
+  Stream<AssetPackStatusUpdate> watchAssetPackStatus(String assetPackName) {
+    lastWatchedPack = assetPackName;
+    return Stream<AssetPackStatusUpdate>.value(
+      AssetPackStatusUpdate(
+        name: assetPackName,
+        status: AssetPackStatus.completed,
+        downloadProgress: 1.0,
+      ),
+    );
+  }
+}
+
+/// A platform implementation written before `watchAssetPackStatus` existed.
+class LegacyPlatform extends AssetDeliveryPlatform {
+  @override
+  Future<void> fetch(String assetPackName) async {}
+
+  @override
+  Future<void> fetchAssetPackState(String assetPackName) async {}
+
+  @Deprecated('Mirrors the deprecated platform member.')
+  @override
+  void getAssetPackStatus(Function(Map<String, dynamic>) onUpdate) {}
+
+  @override
+  Future<String?> getAssetPackPath({
+    required String assetPackName,
+    required int count,
+    required String namingPattern,
+    required String fileExtension,
+  }) async =>
+      null;
+
+  @override
+  Future<Uint8List?> getInstallTimeAssetBytes(String relativeAssetPath) async =>
+      null;
 }
 
 void main() {
@@ -50,10 +91,10 @@ void main() {
     expect(initialPlatform, isInstanceOf<MethodChannelAssetDelivery>());
   });
 
-  test('getPlatformVersion', () async {
-    //AssetDelivery assetDeliveryPlugin = AssetDelivery();
-    MockAssetDeliveryPlatform fakePlatform = MockAssetDeliveryPlatform();
+  test('a mock platform can replace the default instance', () async {
+    final fakePlatform = MockAssetDeliveryPlatform();
     AssetDeliveryPlatform.instance = fakePlatform;
+    expect(AssetDeliveryPlatform.instance, same(fakePlatform));
   });
 
   test('fetch method', () async {
@@ -72,7 +113,30 @@ void main() {
     callback(Map<String, dynamic> data) {
       // Handle data here in the listener callback.
     }
+
+    // ignore: deprecated_member_use_from_same_package
     AssetDelivery.getAssetPackStatus(callback);
     // This should complete without error.
+  });
+
+  test('watchAssetPackStatus forwards the pack name to the platform', () async {
+    final fakePlatform = MockAssetDeliveryPlatform();
+    AssetDeliveryPlatform.instance = fakePlatform;
+
+    final update = await AssetDelivery.watchAssetPackStatus('samplePack').first;
+
+    expect(fakePlatform.lastWatchedPack, 'samplePack');
+    expect(update.name, 'samplePack');
+    expect(update.status, AssetPackStatus.completed);
+  });
+
+  test('an implementation predating watchAssetPackStatus still constructs', () {
+    // The method is non-abstract precisely so that adding it does not break
+    // third-party platform implementations at compile time.
+    final legacy = LegacyPlatform();
+    expect(
+      () => legacy.watchAssetPackStatus('samplePack'),
+      throwsUnimplementedError,
+    );
   });
 }
